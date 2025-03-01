@@ -3,5 +3,6 @@ import { TripService } from './trip.service';
 
 @Controller('trip')
 export class TripController {
-  constructor(private readonly tripService: TripService) {}
+    constructor(private readonly tripService: TripService) {
+    }
 }

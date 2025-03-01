@@ -8,9 +8,10 @@ import { Trip } from './trip.entity';
 import { TripService } from './trip.service';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Trip, TripStage, TripAccess])],
-  controllers: [TripController],
-  providers: [TripService, TripAccessService],
-  exports: [TripService, TripAccessService],
+    imports: [TypeOrmModule.forFeature([Trip, TripStage, TripAccess])],
+    controllers: [TripController],
+    providers: [TripService, TripAccessService],
+    exports: [TripService, TripAccessService],
 })
-export class TripModule {}
+export class TripModule {
+}

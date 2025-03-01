@@ -5,16 +5,16 @@ import { Trip } from './trip.entity';
 
 @Entity()
 export class TripAccess extends BaseEntity {
-  @ManyToOne(() => Trip)
-  trip: Trip;
+    @ManyToOne(() => Trip)
+    trip: Trip;
 
-  @ManyToOne(() => User)
-  user: User;
+    @ManyToOne(() => User)
+    user: User;
 
-  @Column({
-    type: 'text',
-    enum: ['read', 'write'],
-    default: 'read',
-  })
-  accessLevel: 'read' | 'write';
+    @Column({
+        type: 'text',
+        enum: ['read', 'write'],
+        default: 'read',
+    })
+    accessLevel: 'read' | 'write';
 }
