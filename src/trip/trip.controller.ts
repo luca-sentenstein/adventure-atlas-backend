@@ -1,8 +1,7 @@
-import { Controller } from '@nestjs/common';
-import { TripService } from './trip.service';
+import { Controller } from "@nestjs/common";
+import { TripService } from "./trip.service";
 
-@Controller('trip')
+@Controller("trip")
 export class TripController {
-    constructor(private readonly tripService: TripService) {
-    }
+    constructor(private readonly tripService: TripService) {}
 }
