@@ -31,12 +31,14 @@ export class UserService {
         return savedUser.id;
     }
 
+    // only used to check if a user with username is there (username already in use?)
     async readOneByUsername(username: string): Promise<User | null> {
         return await this.usersRepository.findOne({
             where: { userName: username },
         });
     }
 
+    // only used to check if a user with email is there (email already in use?)
     async readOneByEmail(email: string): Promise<User | null> {
         return await this.usersRepository.findOne({
             where: { email: email },
@@ -53,14 +55,21 @@ export class UserService {
         return user !== null;
     }
 
-    async readOneById(id: number): Promise<User | null> {
+    async readOneById(id: number): Promise<Partial<User> | null> {
         const result = await this.usersRepository.find({
             where: { id },
             relations: {
                 tripsWithAccess: { trip: true },
             },
         });
-        return result ? result[0] : null;
+        return result.length > 0
+        ? {
+            // no password and username(already known is returned)
+              firstName: result[0].firstName,
+              lastName: result[0].lastName,
+              email: result[0].email
+          }
+        : null;
     }
 
     async update(id: number, data: Partial<User>) {

@@ -35,12 +35,12 @@ export class UserController {
         }
     }
 
-    // User wants to login
+    // After successful login
     // get all user data
     @Get(":id")
     async getUserById(
         @Param("id", ParseIntPipe) id: number,
-    ): Promise<User | null | undefined> {
+    ): Promise<Partial<User> | null | undefined> {
         try {
             let user = await this.userService.readOneById(id);
             if (user) return user;
