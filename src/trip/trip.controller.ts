@@ -15,7 +15,7 @@ import {
 } from "@nestjs/common";
 import { TripService } from "./trip.service";
 import { Trip } from "./trip.entity";
-import { EntityPropertyNotFoundError, QueryFailedError } from "typeorm";
+import { EntityPropertyNotFoundError } from "typeorm";
 import { TripStage } from "./trip-stage.entity";
 import { Location } from "./location.entity";
 
@@ -54,7 +54,6 @@ export class TripController {
     }
 
     // create a stage without the route
-    //http://localhost:3000/trip/1/stages/1/locations
     @Post(":tripId/stages/:stageId/locations")
     @UsePipes(new ValidationPipe({ transform: true }))
     async createLocations(
