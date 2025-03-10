@@ -1,41 +1,48 @@
-import { Entity, Column, ManyToOne } from 'typeorm';
-import { BaseEntity } from '../shared/base';
-import { Trip } from './trip.entity';
+import {
+    Entity,
+    Column,
+    ManyToOne,
+    OneToMany,
+} from "typeorm";
+import { BaseEntity } from "../shared/base";
+import { Trip } from "./trip.entity";
+import { Location } from "./location.entity";
+import { IsDate, IsNumber, IsString } from "class-validator";
 
-export class Location {
-    @Column()
-    x: number;
 
-    @Column()
-    y: number;
-}
 
 @Entity()
 export class TripStage extends BaseEntity {
     @Column()
+    @IsString()
     title: string;
 
     @Column()
     picture: Buffer;
 
-    @Column({nullable: true})
+    @Column({ nullable: true })  
+    @IsString()  
     description?: string;
 
     @Column()
     displayRoute: boolean;
 
     @Column()
+    @IsNumber()
     cost: number;
 
-    @Column({nullable: true, type: 'datetime'})
+    @Column({ nullable: true, type: "datetime" })
+    @IsDate()
     start?: Date;
 
-    @Column({nullable: true, type: 'datetime'})
+    @Column({ nullable: true, type: "datetime" })
+    @IsDate()
     end?: Date;
 
-    @Column(() => Location)
-    route: Location[];
+    @OneToMany(() => Location, (location) => location.stage, { cascade: true, eager: true }) // eager resolves locations always (globally), when using get on trip
+    locations: Location[];
 
+    // many stages to one trip
     @ManyToOne(() => Trip, (trip) => trip.stages)
     trip: Trip;
 }
