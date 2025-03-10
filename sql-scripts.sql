@@ -11,3 +11,6 @@ FROM trip_stage;
 
 SELECT * 
 FROM location;
+
+SELECT * 
+FROM user;

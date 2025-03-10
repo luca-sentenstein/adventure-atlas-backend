@@ -10,12 +10,16 @@ import {
     ParseIntPipe,
     Patch,
     Post,
+    Req,
+    UseGuards,
     UsePipes,
     ValidationPipe,
 } from "@nestjs/common";
 import { UserService } from "./user.service";
 import { User } from "./user.entity";
 import { EntityPropertyNotFoundError, UpdateResult } from "typeorm";
+import { JwtAuthGuard } from "src/auth/jwt-auth.guard";
+import { UserIdGuard } from "src/auth/user-id.guard";
 
 // format validation: User object must have the correct members (No malformed json)
 @Controller("user")
@@ -37,9 +41,29 @@ export class UserController {
 
     // After successful login
     // get all user data
+    @UseGuards(JwtAuthGuard) // Apply the JWT guard
+    @Get()
+    async getUserById(@Req() request: Request): Promise<Partial<User> | null | undefined> {
+        const userId = (request as any).user?.id; // Assuming 'sub' is the user ID in the JWT payload
+
+        if (!userId) {
+            throw new NotFoundException('User ID not found in token');
+        }
+
+        try {
+            const user = await this.userService.readOneById(userId);
+            if (user) return user;
+            else throw new NotFoundException();
+        } catch (ex) {
+            // Handle exceptions as needed
+            throw ex; // Rethrow or handle the exception
+        }
+    }
+    /*
+    @UseGuards(JwtAuthGuard, new UserIdGuard('id'))
     @Get(":id")
-    async getUserById(
-        @Param("id", ParseIntPipe) id: number,
+    async getUserById(        
+       @Param("id", ParseIntPipe) id: number,
     ): Promise<Partial<User> | null | undefined> {
         try {
             let user = await this.userService.readOneById(id);
@@ -48,7 +72,7 @@ export class UserController {
         } catch (ex) {
             this.exceptionHandler(ex);
         }
-    }
+    }*/
 
     // User changes his data (everything changeable except the id)
     @Patch(":id")

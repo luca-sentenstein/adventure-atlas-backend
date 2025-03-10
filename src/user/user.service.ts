@@ -12,6 +12,8 @@ export class UserService {
         private usersRepository: Repository<User>
     ) {}
 
+    
+
     private async hashPassword(password: string): Promise<string> {
         const saltRounds = 10; // You can adjust the number of salt rounds
         return bcrypt.hash(password, saltRounds);
@@ -23,10 +25,8 @@ export class UserService {
             throw new ConflictException("Username");
 
         // Hash the password, the parameter is the plain text password
-        //user.passwordHash = await this.hashPassword(user.passwordHash);
-        // Generate JWT token
-        //const token = await this.authService.generateToken(user);
-
+        user.password = await this.hashPassword(user.password);
+        console.log(`Hashed Password: ${user.password}`); // Log the hashed password
         const savedUser = await this.usersRepository.save(user);
         return savedUser.id;
     }
