@@ -5,6 +5,7 @@ import { Trip } from './trip.entity';
 
 @Entity()
 export class TripAccess extends BaseEntity {
+    // many users with access on one trip
     @ManyToOne(() => Trip)
     trip: Trip;
 

@@ -23,7 +23,7 @@ export class User extends BaseEntity {
 
     @Column()
     @IsString() 
-    passwordHash: string;
+    password: string;
 
     @OneToMany(() => TripAccess, (tripAccess) => tripAccess.user)
     tripsWithAccess: TripAccess;
