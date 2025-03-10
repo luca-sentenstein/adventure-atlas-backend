@@ -23,6 +23,24 @@ import { Location } from "./location.entity";
 export class TripController {
     constructor(private readonly tripService: TripService) {}
 
+    // get all public trips
+    @Get("discover")
+    async getAllPublicTrips(): Promise<Trip[] | null | undefined> {
+        try {
+            let trips = await this.tripService.readAll();
+            console.log(trips);
+            if (trips.length > 0) {
+                return trips;
+            } else {
+                throw new NotFoundException();
+            }
+        } catch (ex) {
+            this.exceptionHandler(ex);
+        }
+    }
+    
+
+
     // User starts creating trip, create base trip first
     // create a whole trip
     @Post()
@@ -38,22 +56,23 @@ export class TripController {
         }
     }
 
+   
     // create a stage without the route
     @Post(":id/newStage")
     @UsePipes(new ValidationPipe({ transform: true }))
     async createStage(
-        @Param("id", ParseIntPipe) id1: number,
+        @Param("id", ParseIntPipe) id: number,
         @Body() tripStage: Partial<TripStage>,
     ): Promise<any | null | undefined> {
         try {
             // Create the trip
-            return await this.tripService.createStage(id1, tripStage);
+            return await this.tripService.createStage(id, tripStage);
         } catch (ex) {
             this.exceptionHandler(ex);
         }
     }
 
-    // create a stage without the route
+    // create locations of a stage
     @Post(":tripId/stages/:stageId/locations")
     @UsePipes(new ValidationPipe({ transform: true }))
     async createLocations(
@@ -62,30 +81,33 @@ export class TripController {
         @Body() locations: Location[],
     ): Promise<void> {
         try {
-            // Create the trip
-            await this.tripService.insertMultipleLocations(tripId, stageId, locations);
+            // Create the locations inside the stage and save stage so relations in db are correct
+            await this.tripService.insertMultipleLocations(
+                tripId,
+                stageId,
+                locations,
+            );
         } catch (ex) {
             this.exceptionHandler(ex);
         }
     }
 
-    // create a stage without the route
+    // create a stage without the locations, just basic information like description etc.
     @Patch(":id/newStage")
     @UsePipes(new ValidationPipe({ transform: true }))
     async updateStage(
-        @Param("id", ParseIntPipe) id1: number,
+        @Param("id", ParseIntPipe) id: number,
         @Body() tripStage: Partial<TripStage>,
     ): Promise<any | null | undefined> {
         try {
             // Create the trip
-            return await this.tripService.createStage(id1, tripStage);
+            return await this.tripService.createStage(id, tripStage);
         } catch (ex) {
             this.exceptionHandler(ex);
         }
     }
 
-
-    // get all trip data (open trip site)
+    // get data of trip (when opening trips)
     @Get(":id")
     async getTrip(
         @Param("id", ParseIntPipe) id: number,
@@ -99,6 +121,9 @@ export class TripController {
             this.exceptionHandler(ex);
         }
     }
+
+    
+    
 
     exceptionHandler(ex: any) {
         // no break needed because exception (The adequate HTTP error is returned)

@@ -73,8 +73,29 @@ export class TripService {
                 owner: true,
                 stages: { locations: true },
             },
+            select: {
+                owner: {
+                    id: true, // Only select the owner's id
+                },
+            },
         });
         return trip;
+    }
+
+    // get all public trips
+    async readAll(): Promise<Trip[]> {
+        return await this.tripsRepository.find({
+            where: { public : true },
+            relations: {
+                owner: true,
+                stages: { locations: true },
+            },
+            select: {
+                owner: {
+                    id: true, // Only select the owner's id
+                },
+            },
+        });
     }
 
     async update(id: number, data: Partial<Trip>) {
