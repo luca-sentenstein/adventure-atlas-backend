@@ -27,19 +27,11 @@ export class TripController {
     @Get("discover")
     async getAllPublicTrips(): Promise<Trip[] | null | undefined> {
         try {
-            let trips = await this.tripService.readAll();
-            console.log(trips);
-            if (trips.length > 0) {
-                return trips;
-            } else {
-                throw new NotFoundException();
-            }
+            return await this.tripService.readAll();
         } catch (ex) {
             this.exceptionHandler(ex);
         }
     }
-    
-
 
     // User starts creating trip, create base trip first
     // create a whole trip
@@ -56,7 +48,6 @@ export class TripController {
         }
     }
 
-   
     // create a stage without the route
     @Post(":id/newStage")
     @UsePipes(new ValidationPipe({ transform: true }))
@@ -121,9 +112,6 @@ export class TripController {
             this.exceptionHandler(ex);
         }
     }
-
-    
-    
 
     exceptionHandler(ex: any) {
         // no break needed because exception (The adequate HTTP error is returned)
