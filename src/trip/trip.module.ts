@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { Location } from './location.entity';
 import { TripAccess } from './trip-access.entity';
 import { TripAccessService } from './trip-access.service';
 import { TripStage } from './trip-stage.entity';
@@ -8,7 +9,7 @@ import { Trip } from './trip.entity';
 import { TripService } from './trip.service';
 
 @Module({
-    imports: [TypeOrmModule.forFeature([Trip, TripStage, TripAccess])],
+    imports: [TypeOrmModule.forFeature([Trip, TripStage, TripAccess, Location])],
     controllers: [TripController],
     providers: [TripService, TripAccessService],
     exports: [TripService, TripAccessService],
