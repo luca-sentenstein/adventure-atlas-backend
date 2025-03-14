@@ -41,7 +41,8 @@ export class UserController {
 
     // After successful login
     // get all user data
-    @UseGuards(JwtAuthGuard) // Apply the JWT guard
+    //@UseGuards(JwtAuthGuard, new UserIdGuard('id'))// Apply the JWT guard
+    @UseGuards(JwtAuthGuard)
     @Get()
     async getUserById(@Req() request: Request): Promise<Partial<User> | null | undefined> {
         const userId = (request as any).user?.id; // Assuming 'sub' is the user ID in the JWT payload
@@ -59,20 +60,6 @@ export class UserController {
             throw ex; // Rethrow or handle the exception
         }
     }
-    /*
-    @UseGuards(JwtAuthGuard, new UserIdGuard('id'))
-    @Get(":id")
-    async getUserById(        
-       @Param("id", ParseIntPipe) id: number,
-    ): Promise<Partial<User> | null | undefined> {
-        try {
-            let user = await this.userService.readOneById(id);
-            if (user) return user;
-            else throw new NotFoundException();
-        } catch (ex) {
-            this.exceptionHandler(ex);
-        }
-    }*/
 
     // User changes his data (everything changeable except the id)
     @Patch(":id")
