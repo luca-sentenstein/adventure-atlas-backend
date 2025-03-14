@@ -1,9 +1,6 @@
-SELECT id, createdAt, updatedAt, title, subtitle, description, image, public, ownerId
+SELECT *
 FROM trip;
 
-
-DELETE FROM trip
-WHERE id=1;
 
 
 SELECT * 

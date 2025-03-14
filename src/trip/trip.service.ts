@@ -34,6 +34,7 @@ export class TripService {
         }
         console.log("tripId: " + tripId + " stageId: " + stageId);
         console.log(typeof locations); // "number"
+        console.log(locations); // "number"
 
         // add all locations to stage
         stageData.locations = locations;
@@ -42,24 +43,23 @@ export class TripService {
         const newStage = await this.tripStageRepository.save(stageData);
 
         // Add the updated TripStage to the Trip
-        trip.stages.push(stageData);
-        await this.create(trip);
+        //trip.stages.push(stageData);
+        //await this.create(trip);
     }
 
     async createStage(
         tripId: number,
-        stageData: Partial<TripStage>,
+        stageData: Omit<TripStage, "locations"> & Partial<TripStage>,
     ): Promise<TripStage> {
         const trip = await this.readOne(tripId);
         if (!trip) {
             throw new Error("Trip not found");
         }
 
-        const newStage = this.tripStageRepository.create(stageData);
-        trip.stages.push(newStage);
-        await this.create(trip);
-
-        return newStage;
+        //const newStage = this.tripStageRepository.create(stageData);
+        trip.stages.push({ locations: [], ...stageData });
+        const updatedTrip = await this.create(trip);
+        return updatedTrip.stages[updatedTrip.stages.length - 1];
     }
 
     async create(trip: Partial<Trip>): Promise<Trip> {
@@ -85,7 +85,7 @@ export class TripService {
     // get all public trips
     async readAll(): Promise<Trip[]> {
         return await this.tripsRepository.find({
-            where: { public : true },
+            where: { public: true },
             relations: {
                 owner: true,
                 stages: { locations: true },

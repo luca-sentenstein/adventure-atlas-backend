@@ -18,8 +18,8 @@ export class Location extends BaseEntity {
     @IsNumber()
     Lng: number;
 
+    
     // many locations to one stage
     @ManyToOne(() => TripStage, (stage) => stage.locations)
-    @Type(() => TripStage)
     stage: TripStage;
 }

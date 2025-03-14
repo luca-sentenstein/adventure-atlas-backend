@@ -53,8 +53,8 @@ export class TripController {
     @UsePipes(new ValidationPipe({ transform: true }))
     async createStage(
         @Param("id", ParseIntPipe) id: number,
-        @Body() tripStage: Partial<TripStage>,
-    ): Promise<any | null | undefined> {
+        @Body() tripStage: Omit<TripStage, "locations"> & Partial<TripStage>,
+    ): Promise<TripStage | null | undefined> {
         try {
             // Create the trip
             return await this.tripService.createStage(id, tripStage);
@@ -88,7 +88,7 @@ export class TripController {
     @UsePipes(new ValidationPipe({ transform: true }))
     async updateStage(
         @Param("id", ParseIntPipe) id: number,
-        @Body() tripStage: Partial<TripStage>,
+        @Body() tripStage: Omit<TripStage, "locations"> & Partial<TripStage>,
     ): Promise<any | null | undefined> {
         try {
             // Create the trip
