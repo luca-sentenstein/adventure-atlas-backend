@@ -13,6 +13,7 @@ import { AppConfigModule } from "src/config/config.module";
     imports: [
         UserModule,
         PassportModule,
+        AppConfigModule,
         JwtModule.registerAsync({
           imports: [AppConfigModule],
           useFactory: async (configService: MyConfigService) => ({

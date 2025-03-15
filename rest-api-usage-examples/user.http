@@ -1,0 +1,23 @@
+### User register:  creates a user with password (hashed in db)
+POST http://localhost:3000/user
+Content-Type: application/json
+
+{
+    "firstName": "DHBW",
+    "lastName": "Student",
+    "userName": "ilikeadventure",
+    "email": "mustermannm.tin24@student.dhbw-heidenheim.de",
+    "password": "Ihaveasuperstronpassword1234!"
+}
+
+### After login (is in auth.http): get all userdata for user. From now on everything is authenticated with JWT Token
+GET http://localhost:3000/user
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImlsaWtlYWR2ZW50dXJlIiwiaWQiOjQsImlhdCI6MTc0MTk3MTAyMCwiZXhwIjoxNzQxOTc0NjIwfQ.Fed0cpQ05Mf-QJajuDk8tOQsu_qbVDNltsBbztCz2zc
+
+
+Accept: application/json
+
+
+
+
+

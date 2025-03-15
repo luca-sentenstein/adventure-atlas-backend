@@ -1,0 +1,8 @@
+### Login
+POST http://localhost:3000/auth/login
+Content-Type: application/json
+
+{
+    "userName": "ilikeadventure",
+    "password": "Ihaveasuperstronpassword1234!"
+}

@@ -1,0 +1,51 @@
+### Create a trip
+POST http://localhost:3000/trip
+Content-Type: application/json
+
+{
+    "owner" : 1,
+    "title" : "Big city tour",
+    "subtitle" : "a city trip to look around in the city",
+    "description" : "We go on a trip through a city, there is a interesting building included",
+    "public" : true
+}
+
+### Get a trip
+GET http://localhost:3000/trip/7
+Content-Type: application/json
+
+
+### Get all public trips
+GET http://localhost:3000/trip/discover
+Content-Type: application/json
+
+### Add a Stage
+POST http://localhost:3000/trip/7/newStage
+Content-Type: application/json
+
+{
+  "title": "Stage 3",
+  "picture": "base64encodedimage",
+  "description": "This is a new stage",
+  "displayRoute": true,
+  "cost": 100,
+  "start": "2023-10-01T00:00:00Z",
+  "end": "2023-10-02T00:00:00Z"
+}
+
+### Add a locations to stage
+POST http://localhost:3000/trip/7/stages/5/locations
+Content-Type: application/json
+
+[
+    {
+        "name": "Location 1",
+        "Lat": -71.0589,
+        "Lng": 42.3601
+    },
+    {
+        "name": "Location 2",
+        "Lat": -71.0589,
+        "Lng": 42.3601
+    }
+]
