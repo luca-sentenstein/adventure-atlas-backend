@@ -34,6 +34,7 @@ export class TripService {
         }
         console.log("tripId: " + tripId + " stageId: " + stageId);
         console.log(typeof locations); // "number"
+        console.log(locations);
 
         // add all locations to stage
         stageData.locations = locations;
@@ -43,7 +44,7 @@ export class TripService {
 
         // Add the updated TripStage to the Trip
         trip.stages.push(stageData);
-        await this.create(trip);
+        //await this.create(trip);
     }
 
     async createStage(

@@ -1,9 +1,9 @@
-import { Entity, Column, ManyToOne, OneToMany } from "typeorm";
+import { Entity, Column, ManyToOne, OneToMany, JoinColumn } from "typeorm";
 import { BaseEntity } from "../shared/base";
 import { User } from "../user/user.entity";
 import { TripStage } from "./trip-stage.entity";
 import { IsArray, IsBoolean, IsInt, IsString } from "class-validator";
-import { Type } from "class-transformer";
+import { Expose, Type } from "class-transformer";
 
 @Entity()
 export class Trip extends BaseEntity {
