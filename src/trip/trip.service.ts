@@ -40,7 +40,7 @@ export class TripService {
         stageData.locations = locations;
 
         // Save the TripStage
-        const newStage = await this.tripStageRepository.save(stageData);
+        await this.tripStageRepository.save(stageData);
 
         // Add the updated TripStage to the Trip
         trip.stages.push(stageData);
@@ -86,7 +86,7 @@ export class TripService {
     // get all public trips
     async readAll(): Promise<Trip[]> {
         return await this.tripsRepository.find({
-            where: { public : true },
+            where: { public: true },
             relations: {
                 owner: true,
                 stages: { locations: true },
