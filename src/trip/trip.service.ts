@@ -68,7 +68,7 @@ export class TripService {
     }
 
     async readOne(id: number): Promise<Trip | null> {
-        const trip = await this.tripsRepository.findOne({
+        return await this.tripsRepository.findOne({
             where: { id },
             relations: {
                 owner: true,
@@ -80,7 +80,6 @@ export class TripService {
                 },
             },
         });
-        return trip;
     }
 
     // get all public trips
