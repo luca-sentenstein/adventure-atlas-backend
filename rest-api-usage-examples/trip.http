@@ -14,6 +14,10 @@ Content-Type: application/json
 GET http://localhost:3000/trip/7
 Content-Type: application/json
 
+### Get all trips that the user has access to
+GET http://localhost:3000/trip/
+Content-Type: application/json
+
 
 ### Get all public trips
 GET http://localhost:3000/trip/discover

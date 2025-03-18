@@ -9,7 +9,7 @@ import {
     Param,
     ParseIntPipe,
     Patch,
-    Post,
+    Post, Req, UseGuards,
     UsePipes,
     ValidationPipe,
 } from "@nestjs/common";
@@ -18,6 +18,8 @@ import { Trip } from "./trip.entity";
 import { EntityPropertyNotFoundError } from "typeorm";
 import { TripStage } from "./trip-stage.entity";
 import { Location } from "./location.entity";
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { User } from '../user/user.entity';
 
 @Controller("trip")
 export class TripController {
@@ -32,6 +34,28 @@ export class TripController {
             this.exceptionHandler(ex);
         }
     }
+
+    // get all trips by user id
+    @UseGuards(JwtAuthGuard)
+    @Get()
+    async getTripsByAccess(
+        @Req() request: Request,
+    ): Promise<Trip[] | null | undefined> {
+        const userId = (request as { user?: { id?: number } }).user?.id; // Assuming 'id' is the user ID in the JWT payload
+
+        if (!userId) {
+            throw new NotFoundException("User ID not found in token");
+        }
+        try {
+            const trips = await this.tripService.getTripsByUserAccess(userId);
+            if (trips) {
+                return trips;
+            } else throw new NotFoundException();
+        } catch (ex) {
+            this.exceptionHandler(ex);
+        }
+    }
+
 
     // User starts creating trip, create base trip first
     // create a whole trip

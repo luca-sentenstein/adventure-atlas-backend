@@ -98,6 +98,24 @@ export class TripService {
         });
     }
 
+    async getTripsByUserAccess(userId: number): Promise<Trip[]> {
+        return await this.tripsRepository.find({
+            where: [
+                { owner: { id: userId } }, // Trips owned by the user
+                { public: true }, // Public trips
+            ],
+            relations: {
+                owner: true,
+                stages: { locations: true },
+            },
+            select: {
+                owner: {
+                    id: true, // Only include the owner's id
+                },
+            },
+        });
+    }
+
     async update(id: number, data: Partial<Trip>) {
         return await this.tripsRepository.update(id, data);
     }
