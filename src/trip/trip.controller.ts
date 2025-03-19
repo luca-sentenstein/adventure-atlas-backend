@@ -20,16 +20,21 @@ import { TripStage } from "./trip-stage.entity";
 import { Location } from "./location.entity";
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { User } from '../user/user.entity';
+import { TripAccessService } from './trip-access.service';
+import { TripAccess } from './trip-access.entity';
 
 @Controller("trip")
 export class TripController {
-    constructor(private readonly tripService: TripService) {}
+    constructor(
+        private readonly tripService: TripService,
+        private readonly tripAccessService: TripAccessService,
+    ) {}
 
     // get all public trips
     @Get("discover")
     async getAllPublicTrips(): Promise<Trip[] | null | undefined> {
         try {
-            return await this.tripService.readAll();
+            return await this.tripService.readAllPublicTrips();
         } catch (ex) {
             this.exceptionHandler(ex);
         }
@@ -47,7 +52,47 @@ export class TripController {
             throw new NotFoundException("User ID not found in token");
         }
         try {
-            const trips = await this.tripService.getTripsByUserAccess(userId);
+            const tripAccesses =
+                await this.tripAccessService.readAllByUserId(userId);
+
+
+
+
+
+            // append all trips where user is owner to the trips with access
+            const ownerTrips = await this.tripService.getTripsByOwner(userId);
+            const ownerTripAccesses = ownerTrips.map((trip) => ({
+                trip: trip,
+                user: { id: userId },
+            }));
+
+
+            // Combine both TripAccess lists
+            const combinedTripAccesses = [
+                ...tripAccesses,
+                ...ownerTripAccesses,
+            ];
+
+            // Remove duplicates by filtering out unique trip IDs, there could be duplicates when owner and read or write access are the same.
+            const uniqueTripAccesses = combinedTripAccesses.filter(
+                (access, index, self) =>
+                    index ===
+                    self.findIndex((a) => a.trip.id === access.trip.id),
+            );
+
+            // fetch trips to tripids
+            // Fetch all the trips related to the trip accesses
+            const tripIds = uniqueTripAccesses.map((access) => access.trip.id);
+            console.log(tripIds);
+            const trips = await this.tripService.readByIds(
+                tripIds.map((id) => id),
+            );
+
+            if (trips.length == 0) {
+                throw new NotFoundException(
+                    "No trips found for the given trip accesses",
+                );
+            }
             if (trips) {
                 return trips;
             } else throw new NotFoundException();
@@ -67,6 +112,29 @@ export class TripController {
         try {
             // Create the trip
             return await this.tripService.create(trip);
+        } catch (ex) {
+            this.exceptionHandler(ex);
+        }
+    }
+
+
+    // set access of user for trip
+    @UseGuards(JwtAuthGuard)
+    @Post("access")
+    async createTripAccess(
+        @Req() request: Request,
+        @Body() tripAccess: TripAccess,
+    ): Promise<any | null | undefined> {
+        const userId = (request as { user?: { id?: number } }).user?.id; // Assuming 'id' is the user ID in the JWT payload
+
+        if (!userId) {
+            throw new NotFoundException("User ID not found in token");
+        }
+        // find out if user has write access on trip, else throw unauthorized
+        // only owner can set read write
+        try {
+            // Create the trip
+            await this.tripAccessService.create(tripAccess);
         } catch (ex) {
             this.exceptionHandler(ex);
         }
@@ -149,7 +217,8 @@ export class TripController {
                     "The " + ex.message + " already exists.",
                 );
             case ex instanceof NotFoundException:
-                throw new NotFoundException("The Trip does not exist.");
+                throw new NotFoundException(ex.message);
+                //throw new NotFoundException("The Trip does not exist.");
             default:
                 // Handle other types of errors, someone can crash the server otherwise!
                 throw new InternalServerErrorException(

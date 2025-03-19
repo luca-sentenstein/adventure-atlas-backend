@@ -8,8 +8,7 @@ export class TripAccessService {
     constructor(
         @InjectRepository(TripAccess)
         private tripAccessRepository: Repository<TripAccess>,
-    ) {
-    }
+    ) {}
 
     // get all tripids that a user has access to (all table entries with userid)
     async readAllByUserId(id: number): Promise<TripAccess[]> {
@@ -41,7 +40,7 @@ export class TripAccessService {
 
     async readOne(id: number): Promise<TripAccess | null> {
         const result = await this.tripAccessRepository.find({
-            where: {id},
+            where: { id },
             relations: {
                 trip: true,
                 user: true,

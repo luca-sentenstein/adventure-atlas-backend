@@ -10,13 +10,25 @@ Content-Type: application/json
     "public" : true
 }
 
-### Get a trip
+### JUST FOR TESTING: Get a trip
 GET http://localhost:3000/trip/7
 Content-Type: application/json
 
 ### Get all trips that the user has access to
 GET http://localhost:3000/trip/
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImlsaWtlYWR2ZW50dXJlIiwiaWQiOjQsImlhdCI6MTc0MjM5MjY5NCwiZXhwIjoxNzQyMzk2Mjk0fQ.a-IKmZVO5KVKkuDsf0VuZxusS0Z34bkOqZE2Km9fE3U
 Content-Type: application/json
+
+### Add a Tripaccess to trip
+POST http://localhost:3000/trip/access
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImlsaWtlYWR2ZW50dXJlIiwiaWQiOjQsImlhdCI6MTc0MjM4OTAzMywiZXhwIjoxNzQyMzkyNjMzfQ.YAYLcTve3WrfXexFSHeRbgwwA_hGR_-V5IprFk0-RI8
+Content-Type: application/json
+
+{
+    "user" : 4,
+    "trip": 3,
+    "accessLevel": "read"
+}
 
 
 ### Get all public trips
@@ -38,7 +50,7 @@ Content-Type: application/json
 }
 
 ### Add a locations to stage
-POST http://localhost:3000/trip/7/stages/5/locations
+POST http://localhost:3000/trip/3/stages/2/locations
 Content-Type: application/json
 
 [

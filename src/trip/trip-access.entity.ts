@@ -1,21 +1,21 @@
-import { Column, Entity, ManyToOne } from 'typeorm';
-import { BaseEntity } from '../shared/base';
-import { User } from '../user/user.entity';
-import { Trip } from './trip.entity';
+import { Column, Entity, ManyToOne } from "typeorm";
+import { BaseEntity } from "../shared/base";
+import { User } from "../user/user.entity";
+import { Trip } from "./trip.entity";
 
 @Entity()
 export class TripAccess extends BaseEntity {
     // many users with access on one trip
-    @ManyToOne(() => Trip)
+    @ManyToOne(() => Trip, { cascade: true })
     trip: Trip;
 
-    @ManyToOne(() => User)
+    @ManyToOne(() => User, { cascade: true })
     user: User;
 
     @Column({
-        type: 'text',
-        enum: ['read', 'write'],
-        default: 'read',
+        type: "text",
+        enum: ["read", "write"],
+        default: "read",
     })
-    accessLevel: 'read' | 'write';
+    accessLevel: "read" | "write";
 }
