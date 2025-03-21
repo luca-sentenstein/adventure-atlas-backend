@@ -13,16 +13,15 @@ export class TripAccessService {
 
     // get all tripids that a user has access to (all table entries with userid)
     async readAllByUserId(id: number): Promise<TripAccess[]> {
-        const result = await this.tripAccessRepository.find({
+        return await this.tripAccessRepository.find({
             where: {
-                user: { id },
+                user: {id},
             },
             relations: {
                 trip: true,
                 user: true,
             },
         });
-        return result;
     }
 
     // get all the access of users on many trips
@@ -37,6 +36,7 @@ export class TripAccessService {
             },
             select: {
                 user: {
+                    id: true,
                     userName: true,
                 },
                 trip: {

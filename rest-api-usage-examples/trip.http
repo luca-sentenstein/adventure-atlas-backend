@@ -16,7 +16,7 @@ Content-Type: application/json
 
 ### Get all trips that the user has access to
 GET http://localhost:3000/trip/
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImlsaWtlYWR2ZW50dXJlIiwiaWQiOjQsImlhdCI6MTc0MjU0MTk2NCwiZXhwIjoxNzQyNTU5OTY0fQ.ttlIqUwQc2GRmqt1FmtKbKZxn3sagu8yxXXz6zTgGOA
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImlsaWtlYWR2ZW50dXJlIiwiaWQiOjQsImlhdCI6MTc0MjU3OTI2NSwiZXhwIjoxNzQyNTk3MjY1fQ.tO3s_YsbgnsbUtys8TUhvtWPNg0DxbkFQW1sIYIXtbg
 Content-Type: application/json
 
 ### Add a Tripaccess to trip
