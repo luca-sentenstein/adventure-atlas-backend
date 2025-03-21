@@ -1,7 +1,7 @@
 import { Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Trip } from "./trip.entity";
-import { Repository } from "typeorm";
+import { In, Repository } from "typeorm";
 import { TripStage } from "./trip-stage.entity";
 import { Location } from "./location.entity";
 
@@ -40,7 +40,7 @@ export class TripService {
         stageData.locations = locations;
 
         // Save the TripStage
-        const newStage = await this.tripStageRepository.save(stageData);
+        await this.tripStageRepository.save(stageData);
 
         // Add the updated TripStage to the Trip
         trip.stages.push(stageData);
@@ -68,7 +68,7 @@ export class TripService {
     }
 
     async readOne(id: number): Promise<Trip | null> {
-        const trip = await this.tripsRepository.findOne({
+        return await this.tripsRepository.findOne({
             where: { id },
             relations: {
                 owner: true,
@@ -80,13 +80,12 @@ export class TripService {
                 },
             },
         });
-        return trip;
     }
 
     // get all public trips
-    async readAll(): Promise<Trip[]> {
+    async readAllPublicTrips(): Promise<Trip[]> {
         return await this.tripsRepository.find({
-            where: { public : true },
+            where: { public: true },
             relations: {
                 owner: true,
                 stages: { locations: true },
@@ -94,6 +93,43 @@ export class TripService {
             select: {
                 owner: {
                     id: true, // Only select the owner's id
+                },
+            },
+        });
+    }
+
+
+
+
+    // get all trips by tripid list
+    async readByIds(tripIds: number[]): Promise<Trip[]> {
+        return await this.tripsRepository.find({
+            where: { id: In(tripIds) },
+            relations: {
+                owner: true,
+                stages: { locations: true },
+            },
+            select: {
+                owner: {
+                    id: true, // Only select the owner's id
+                    userName: true,
+                },
+            },
+        });
+    }
+
+    async getTripsByOwner(userId: number): Promise<Trip[]> {
+        return await this.tripsRepository.find({
+            where: [
+                { owner: { id: userId } }, // Trips owned by the user
+            ],
+            relations: {
+                owner: true,
+                stages: { locations: true },
+            },
+            select: {
+                owner: {
+                    id: true, // Only include the owner's id
                 },
             },
         });
