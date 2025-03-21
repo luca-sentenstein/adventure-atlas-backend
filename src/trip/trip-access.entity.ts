@@ -9,6 +9,7 @@ export class TripAccess extends BaseEntity {
     @ManyToOne(() => Trip, { cascade: true })
     trip: Trip;
 
+    // one user can have many accesses to different trips
     @ManyToOne(() => User, { cascade: true })
     user: User;
 

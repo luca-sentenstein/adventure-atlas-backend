@@ -98,6 +98,9 @@ export class TripService {
         });
     }
 
+
+
+
     // get all trips by tripid list
     async readByIds(tripIds: number[]): Promise<Trip[]> {
         return await this.tripsRepository.find({
@@ -109,6 +112,7 @@ export class TripService {
             select: {
                 owner: {
                     id: true, // Only select the owner's id
+                    userName: true,
                 },
             },
         });

@@ -1,4 +1,4 @@
-SELECT id, createdAt, updatedAt, title, subtitle, description, image, public, ownerId
+SELECT *
 FROM trip;
 
 
@@ -6,11 +6,14 @@ DELETE FROM trip
 WHERE id=1;
 
 
-SELECT * 
+SELECT *
 FROM trip_stage;
 
-SELECT * 
+SELECT *
 FROM location;
 
-SELECT * 
+SELECT *
 FROM user;
+
+SELECT *
+FROM trip_access;
