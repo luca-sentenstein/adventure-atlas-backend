@@ -5,12 +5,20 @@ import { ConfigService } from "@nestjs/config";
 export class MyConfigService {
     constructor(private configService: ConfigService) {}
 
-    get databaseHost(): string | undefined {
-        return this.configService.get<string>("DATABASE_HOST");
+    get frontendHost(): string | undefined {
+        return this.configService.get<string>("CORS_FRONTEND_HOST");
     }
 
-    get databasePort(): number | undefined {
-        return this.configService.get<number>("DATABASE_PORT");
+    get frontendPort(): number | undefined {
+        return this.configService.get<number>("CORS_FRONTEND_PORT");
+    }
+
+    get backendHost(): string | undefined {
+        return this.configService.get<string>("BACKEND_HOST");
+    }
+
+    get backendPort(): number | undefined {
+        return this.configService.get<number>("BACKEND_PORT");
     }
 
     get jwtSecret(): string | undefined {
