@@ -5,24 +5,16 @@ import { MyConfigService } from "./config/config.service";
 async function bootstrap() {
     const app = await NestFactory.create(AppModule);
 
+    // Access the ConfigService
+    const configService = app.get(MyConfigService);
+
     app.enableCors({
-        origin: "http://localhost:4200",
-        methods: "GET, PUT, PATCH, POST, DELETE",
+        origin: "http://" + configService.frontendHost + ":" + configService.frontendPort,
+        methods: "GET, PATCH, POST, DELETE",
         allowedHeaders: ["Content-Type", "Authorization"]
     })
 
-    // Access the ConfigService
-    //const configService = app.get(MyConfigService);
-
-    console.log(process.env.JWT_SECRET);
-    console.log(process.env.JWT_VALID);
-    /*
-    console.log(configService.databaseHost);
-    console.log(configService.databasePort);
-    console.log(configService.jwtSecret);
-    */
-
-    await app.listen(process.env.PORT ?? 3000);
+    await app.listen(configService.backendPort ?? 3000);
 }
 
 bootstrap();
