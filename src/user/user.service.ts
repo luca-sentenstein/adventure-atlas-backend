@@ -12,7 +12,7 @@ export class UserService {
         private usersRepository: Repository<User>
     ) {}
 
-    
+
 
     private async hashPassword(password: string): Promise<string> {
         const saltRounds = 10; // You can adjust the number of salt rounds
@@ -65,6 +65,7 @@ export class UserService {
         return result.length > 0
         ? {
             // no password and username(already known is returned)
+              id: result[0].id,
               firstName: result[0].firstName,
               lastName: result[0].lastName,
               email: result[0].email

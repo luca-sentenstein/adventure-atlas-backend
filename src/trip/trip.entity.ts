@@ -24,7 +24,7 @@ export class Trip extends BaseEntity {
     @IsString()
     description: string;
 
-    @Column({ nullable: true })
+    @Column({ nullable: true , type: 'blob' })
     image?: Buffer;
 
     @Column({ default: false })

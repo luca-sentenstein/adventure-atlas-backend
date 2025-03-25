@@ -126,4 +126,11 @@ export class TripAccessService {
     async findByUserAndTrip(userId: number, tripId: number): Promise<TripAccess | null> {
         return this.tripAccessRepository.findOne({ where: { user: { id: userId }, trip: { id: tripId } } });
     }
+
+    async isWriteAccess(userId: number, tripId: number): Promise<boolean> {
+        const tripaccess = await this.findByUserAndTrip(userId, tripId)
+        if (!tripaccess)
+            return false;
+        return tripaccess.accessLevel == "write";
+    }
 }
