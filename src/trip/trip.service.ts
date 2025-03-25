@@ -1,4 +1,4 @@
-import { Injectable } from "@nestjs/common";
+import { Injectable, NotFoundException, UnauthorizedException } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Trip } from "./trip.entity";
 import { In, Repository } from "typeorm";
@@ -6,6 +6,7 @@ import { TripStage } from "./trip-stage.entity";
 import { Waypoint } from "./waypoint.entity";
 import { UserService } from '../user/user.service';
 import { User } from '../user/user.entity';
+import { TripAccessService } from './trip-access.service';
 
 @Injectable()
 export class TripService {
@@ -14,7 +15,8 @@ export class TripService {
         private tripsRepository: Repository<Trip>,
         @InjectRepository(TripStage)
         private tripStageRepository: Repository<TripStage>,
-        private readonly userService: UserService
+        private readonly userService: UserService,
+        private readonly tripAccessService: TripAccessService
     ) {}
 
     async createTrip(userId: number, tripData: Partial<Trip>): Promise<void> {
@@ -200,5 +202,32 @@ export class TripService {
 
         // Finally, delete the Trip itself
         await this.tripsRepository.delete(id);
+    }
+
+
+    doesUserHaveRightsToUpdateAccess(request: Request, tripId): boolean {
+        const userId = this.extractUserId(request)
+        // Rights to set trip access
+            if (!(this.isOwner(userId, tripId)))
+                throw new UnauthorizedException()
+        return true;
+    }
+
+    doesUserHaveRightsToEditTrip(request: Request, tripId): boolean {
+        const userId = this.extractUserId(request)
+            // User has Access by Tripaccess write
+            if(!(this.tripAccessService.isWriteAccess(userId, tripId)))
+                throw new UnauthorizedException()
+            // User has Access by Tripaccess write
+            if (!(this.isOwner(userId, tripId)))
+                throw new UnauthorizedException()
+        return true;
+    }
+
+    extractUserId(request: Request): number {
+        const userId = (request as { user?: { id?: number } }).user?.id; // Assuming 'id' is the user ID in the JWT payload
+        if (!userId)
+            throw new NotFoundException("User ID not found in token");
+        return userId;
     }
 }

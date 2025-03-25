@@ -23,8 +23,6 @@ import { Waypoint } from "./waypoint.entity";
 import { JwtAuthGuard } from "../auth/jwt-auth.guard";
 import { TripAccessService } from "./trip-access.service";
 import { TripAccess } from "./trip-access.entity";
-import { UserService } from '../user/user.service';
-import { User } from '../user/user.entity';
 
 @Controller("trip")
 export class TripController {
@@ -34,6 +32,21 @@ export class TripController {
     ) {
     }
 
+    @UseGuards(JwtAuthGuard)
+    @Patch(":tripId")
+    async updateTrip(
+        @Req() request: Request,
+        @Param("tripId", ParseIntPipe) tripId: number,
+        @Body() trip: Partial<Trip>,
+    ): Promise<void> {
+        this.tripService.doesUserHaveRightsToEditTrip(request, tripId);
+        try {
+            await this.tripService.update(tripId, trip);
+        } catch (ex) {
+            this.exceptionHandler(ex);
+        }
+    }
+
     // set access of user for trip
     @UseGuards(JwtAuthGuard)
     @Delete("access")
@@ -41,13 +54,9 @@ export class TripController {
         @Req() request: Request,
         @Body() tripAccess: TripAccess,
     ): Promise<void> {
-        const userId = (request as { user?: { id?: number } }).user?.id; // Assuming 'id' is the user ID in the JWT payload
-        console.log("Trip access delete");
-        if (!userId) {
-            throw new NotFoundException("User ID not found in token");
-        }
         // find out if user has write access on trip, else throw unauthorized
         // only owner can set read write
+        this.tripService.doesUserHaveRightsToUpdateAccess(request, tripAccess.trip.id);
         // Step 1: Find the tripAccess entry
         if (tripAccess.user && tripAccess.trip) {
             const tripAcc = await this.tripAccessService.findByUserAndTrip(tripAccess.user.id, tripAccess.trip.id);
@@ -73,11 +82,7 @@ export class TripController {
     async getTripsByAccess(
         @Req() request: Request,
     ): Promise<Trip[] | null | undefined> {
-        const userId = (request as { user?: { id?: number } }).user?.id; // Assuming 'id' is the user ID in the JWT payload
-
-        if (!userId) {
-            throw new NotFoundException("User ID not found in token");
-        }
+        const userId = this.tripService.extractUserId(request)
         try {
             const userTripAccesses =
                 await this.tripAccessService.readAllByUserId(userId);
@@ -126,13 +131,7 @@ export class TripController {
         }
     }
 
-    extractUserId(request: Request): number
-    {
-        const userId = (request as { user?: { id?: number } }).user?.id; // Assuming 'id' is the user ID in the JWT payload
-        if (!userId)
-            throw new NotFoundException("User ID not found in token");
-        return userId;
-    }
+
 
     // User starts creating trip, create base trip first
     // create a whole trip
@@ -141,7 +140,7 @@ export class TripController {
     @UsePipes(new ValidationPipe({transform: true}))
     async createTrip(@Req() request: Request, @Body() trip: Partial<Trip>): Promise<void> {
         try {
-            const userId = this.extractUserId(request);
+            const userId = this.tripService.extractUserId(request);
             await this.tripService.createTrip(userId, trip);
         } catch (ex) {
             this.exceptionHandler(ex);
@@ -153,19 +152,7 @@ export class TripController {
     @Delete(":id")
     async deleteTrip(@Req() request: Request,
                      @Param("id", ParseIntPipe) tripId: number,): Promise<void> {
-        const userId = (request as { user?: { id?: number } }).user?.id; // Assuming 'id' is the user ID in the JWT payload
-
-        if (!userId) {
-            throw new NotFoundException("User ID not found in token");
-        }
-
-        // Check if the user is the owner of the trip with the given tripId
-        const isOwner = await this.tripService.isOwner(userId, tripId);
-        if (!isOwner) {
-            throw new UnauthorizedException(
-                "User does not have ownership of the specified trip",
-            );
-        }
+        this.tripService.doesUserHaveRightsToEditTrip(request, tripId);
         // delete trip
         await this.tripService.deleteTrip(tripId);
     }
@@ -176,19 +163,7 @@ export class TripController {
     async deleteStage(@Req() request: Request,
                       @Param("tripId", ParseIntPipe) tripId: number,
                       @Param("stageId", ParseIntPipe) stageId: number,): Promise<void> {
-        const userId = (request as { user?: { id?: number } }).user?.id; // Assuming 'id' is the user ID in the JWT payload
-
-        if (!userId) {
-            throw new NotFoundException("User ID not found in token");
-        }
-
-        // Check if the user is the owner of the trip with the given tripId
-        const isOwner = await this.tripService.isOwner(userId, tripId);
-        if (!isOwner) {
-            throw new UnauthorizedException(
-                "User does not have ownership of the specified trip",
-            );
-        }
+        this.tripService.doesUserHaveRightsToUpdateAccess(request, tripId);
         // delete stage
         await this.tripService.deleteStage(stageId);
     }
@@ -201,11 +176,7 @@ export class TripController {
         @Req() request: Request,
         @Body() tripAccess: TripAccess,
     ): Promise<void> {
-        const userId = (request as { user?: { id?: number } }).user?.id; // Assuming 'id' is the user ID in the JWT payload
-
-        if (!userId) {
-            throw new NotFoundException("User ID not found in token");
-        }
+        this.tripService.doesUserHaveRightsToEditTrip(request, tripAccess.trip.id);
         // find out if user has write access on trip, else throw unauthorized
         // only owner can set read write
         try {
