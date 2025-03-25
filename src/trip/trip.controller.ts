@@ -3,13 +3,11 @@ import {
     Controller,
     Delete,
     Get,
-    NotFoundException,
     Param,
     ParseIntPipe,
     Patch,
     Post,
     Req,
-    UnauthorizedException,
     UseGuards,
     UsePipes,
     ValidationPipe,
@@ -26,7 +24,7 @@ import { TripAccess, TripAccessDto } from "./trip-access.entity";
 export class TripController {
     constructor(
         private readonly tripService: TripService,
-        private readonly tripAccessService: TripAccessService,
+        private readonly tripAccessService: TripAccessService
     ) {
     }
 
@@ -38,7 +36,7 @@ export class TripController {
         @Body() tripAccess: TripAccessDto,
     ): Promise<TripAccess | undefined | null> {
         this.tripAccessService.doesUserHaveRightsToEditTrip(request, tripAccess.trip);
-        // find id of user in tripaccess by username
+        // find id of user in tripAccess by username
         // find out if user has write access on trip, else throw unauthorized
         // only owner can set read write
         return await this.tripAccessService.create(tripAccess);
@@ -52,9 +50,7 @@ export class TripController {
         @Body() trip: Partial<Trip>,
     ): Promise<void> {
         this.tripAccessService.doesUserHaveRightsToEditTrip(request, tripId);
-
-            await this.tripService.update(tripId, trip);
-
+        await this.tripService.update(tripId, trip);
     }
 
     // set access of user for trip
@@ -65,21 +61,10 @@ export class TripController {
         @Param("tripAccessId", ParseIntPipe) tripAccessId: number,
         @Body() tripAccess: TripAccess,
     ): Promise<void> {
-        await this.removeTripAccess(request, tripAccessId);
+        this.tripAccessService.doesUserHaveRightsToUpdateAccess(request, tripAccessId);
+        await this.tripAccessService.removeTripAccess(request, tripAccessId);
     }
 
-    async removeTripAccess(request: Request, tripAccessId: number) {
-        // find out if user has write access on trip, else throw unauthorized
-        // only owner can set read write
-        if (!(this.tripService.doesUserHaveRightsToUpdateAccess(request, tripAccessId))) {
-            throw new UnauthorizedException()
-        }
-        const tripAccess = await this.tripAccessService.readOne(tripAccessId);
-        // Step 1: Find the tripAccess entry
-        if (tripAccess) {
-            await this.tripAccessService.delete(tripAccessId);
-        } else throw new NotFoundException();
-    }
 
     // get all public trips
     @Get("discover")
@@ -93,50 +78,8 @@ export class TripController {
     async getTripsByAccess(
         @Req() request: Request,
     ): Promise<Trip[] | null | undefined> {
-        const userId = this.tripService.extractUserId(request)
-            const userTripAccesses =
-                await this.tripAccessService.readAllByUserId(userId);
-
-            // append all trips where user is owner to the trips with access
-            const ownerTrips = await this.tripService.getTripsByOwner(userId);
-            const ownerTripAccesses = ownerTrips.map((trip) => ({
-                trip: trip,
-                user: {id: userId},
-            }));
-
-            // Combine both TripAccess lists
-            const combinedTripAccesses = [
-                ...userTripAccesses,
-                ...ownerTripAccesses,
-            ];
-
-            // Remove duplicates by filtering out unique trip IDs, there could be duplicates when owner and read or write access are the same.
-            const uniqueTripAccesses = combinedTripAccesses.filter(
-                (access, index, self) =>
-                    index ===
-                    self.findIndex((a) => a.trip.id === access.trip.id),
-            );
-
-            // fetch trips to tripIds
-            // Fetch all the trips related to the trip accesses
-            const tripIds = uniqueTripAccesses.map((access) => access.trip.id);
-            console.log(tripIds);
-            let trips = await this.tripService.readByIds(
-                tripIds.map((id) => id),
-            );
-
-            trips =
-                await this.tripAccessService.attachTripAccessesToTrips(trips);
-
-            if (trips.length == 0) {
-                throw new NotFoundException(
-                    "No trips found for the given trip accesses",
-                );
-            }
-            if (trips) {
-                return trips;
-            } else throw new NotFoundException();
-        }
+        return await this.tripAccessService.readTripsByAccess(request);
+    }
 
 
     // User starts creating trip, create base trip first
@@ -144,9 +87,9 @@ export class TripController {
     @UseGuards(JwtAuthGuard)
     @Post()
     @UsePipes(new ValidationPipe({transform: true}))
-    async createTrip(@Req() request: Request, @Body() trip: Partial<Trip>): Promise<void> {
-        const userId = this.tripService.extractUserId(request);
-        await this.tripService.createTrip(userId, trip);
+    async createTrip(@Req() request: Request, @Body() trip: Partial<Trip>): Promise<Trip> {
+        const userId = this.tripAccessService.extractUserId(request);
+        return await this.tripService.createTrip(userId, trip);
     }
 
     // delete trip
@@ -165,60 +108,54 @@ export class TripController {
     async deleteStage(@Req() request: Request,
                       @Param("tripId", ParseIntPipe) tripId: number,
                       @Param("stageId", ParseIntPipe) stageId: number,): Promise<void> {
-        this.tripService.doesUserHaveRightsToUpdateAccess(request, tripId);
+        this.tripAccessService.doesUserHaveRightsToEditTrip(request, tripId);
         // delete stage
         await this.tripService.deleteStage(stageId);
     }
 
 
     // create a stage without the route
-    @Post(":id/newStage")
+    @Post(":tripId/newStage")
     @UsePipes(new ValidationPipe({transform: true}))
     async createStage(
-        @Param("id", ParseIntPipe) id: number,
+        @Req() request: Request,
+        @Param("tripId", ParseIntPipe) tripId: number,
         @Body() tripStage: Partial<TripStage>,
     ): Promise<void> {
-        await this.tripService.createStage(id, tripStage);
-
+        this.tripAccessService.doesUserHaveRightsToEditTrip(request, tripId);
+        await this.tripService.createStage(tripId, tripStage);
     }
 
     // create locations of a stage
+    @UseGuards(JwtAuthGuard)
     @Post(":tripId/stages/:stageId/locations")
     @UsePipes(new ValidationPipe({transform: true}))
     async createLocations(
+        @Req() request: Request,
         @Param("tripId", ParseIntPipe) tripId: number,
         @Param("stageId", ParseIntPipe) stageId: number,
         @Body() waypoints: Waypoint[],
     ): Promise<void> {
-            // Create the locations inside the stage and save stage so relations in db are correct
-            await this.tripService.insertMultipleLocations(
-                tripId,
-                stageId,
-                waypoints,
-            );
+        this.tripAccessService.doesUserHaveRightsToEditTrip(request, tripId);
+        // Create the locations inside the stage and save stage so relations in db are correct
+        await this.tripService.insertMultipleLocations(
+            tripId,
+            stageId,
+            waypoints,
+        );
     }
 
-    // create a stage without the locations, just basic information like description etc.
-    @Patch(":id/newStage")
+    // update a stage without the locations, just basic information like description etc.
+    @UseGuards(JwtAuthGuard)
+    @Patch(":tripId/newStage")
     @UsePipes(new ValidationPipe({transform: true}))
     async updateStage(
-        @Param("id", ParseIntPipe) id: number,
+        @Req() request: Request,
+        @Param("tripId", ParseIntPipe) tripId: number,
         @Body() tripStage: Partial<TripStage>,
     ): Promise<void> {
-            // Create the trip
-            await this.tripService.createStage(id, tripStage);
-
-    }
-
-    // get data of trip (when opening trips)
-    @Get(":id")
-    async getTrip(
-        @Param("id", ParseIntPipe) id: number,
-    ): Promise<Trip | null | undefined> {
-
-            const trip = await this.tripService.readOne(id);
-            if (trip) {
-                return trip;
-            } else throw new NotFoundException();
+        this.tripAccessService.doesUserHaveRightsToEditTrip(request, tripId)
+        // Create the stage
+        await this.tripService.createStage(tripId, tripStage);
     }
 }

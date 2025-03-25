@@ -4,8 +4,6 @@ import {
     Delete,
     Get,
     NotFoundException,
-    Param,
-    ParseIntPipe,
     Patch,
     Post,
     Req,
@@ -21,7 +19,14 @@ import { JwtAuthGuard } from "src/auth/jwt-auth.guard";
 // format validation: User object must have the correct members (No malformed json)
 @Controller("user")
 export class UserController {
-    constructor(private readonly userService: UserService) {}
+    constructor(private readonly userService: UserService,) {}
+
+    extractUserId(request: Request): number {
+        const userId = (request as { user?: { id?: number } }).user?.id; // Assuming 'id' is the user ID in the JWT payload
+        if (!userId)
+            throw new NotFoundException("User ID not found in token");
+        return userId;
+    }
 
     // User did register
     // create a whole user
@@ -30,46 +35,35 @@ export class UserController {
     async createUser(@Body() user: User): Promise<any | null | undefined> {
         // Create the user
         return await this.userService.create(user);
-
     }
 
     @UseGuards(JwtAuthGuard)
     @Delete()
     async deleteUser(@Req() request: Request): Promise<void> {
-        const userId = (request as any).user?.id; // Assuming 'sub' is the user ID in the JWT payload
-
-        if (!userId) {
-            throw new NotFoundException('User ID not found in token');
-        }
+        const userId = this.extractUserId(request);
         await this.userService.delete(userId);
     }
 
     // After successful login
     // get all user data
-    //@UseGuards(JwtAuthGuard, new UserIdGuard('id'))// Apply the JWT guard
     @UseGuards(JwtAuthGuard)
     @Get()
     async getUserById(@Req() request: Request): Promise<Partial<User> | null | undefined> {
-        const userId = (request as any).user?.id; // Assuming 'sub' is the user ID in the JWT payload
-
-        if (!userId) {
-            throw new NotFoundException('User ID not found in token');
-        }
+        const userId = this.extractUserId(request);
         const user = await this.userService.readOneById(userId);
         if (user) return user;
         else throw new NotFoundException();
-
     }
 
     // User changes his data (everything changeable except the id)
-    @Patch(":id")
+    @UseGuards(JwtAuthGuard)
+    @Patch()
     async updateUser(
-        @Param("id", ParseIntPipe) id: number,
+        @Req() request: Request,
         @Body() user: User,
     ): Promise<UpdateResult | null | undefined> {
+        const userId = this.extractUserId(request);
             // Update the user
-            return await this.userService.update(id, user);
+            return await this.userService.update(userId, user);
     }
-
-
 }

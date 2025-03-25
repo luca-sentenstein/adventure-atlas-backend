@@ -1,7 +1,7 @@
 import { ConflictException, Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { User } from "src/user/user.entity";
-import { Repository } from "typeorm";
+import { FindOneOptions, Repository } from "typeorm";
 import * as bcrypt from "bcrypt";
 
 // exist validation: username, id and email can only exist once
@@ -11,8 +11,6 @@ export class UserService {
         @InjectRepository(User)
         private usersRepository: Repository<User>
     ) {}
-
-
 
     private async hashPassword(password: string): Promise<string> {
         const saltRounds = 10; // You can adjust the number of salt rounds
@@ -26,7 +24,6 @@ export class UserService {
 
         // Hash the password, the parameter is the plain text password
         user.password = await this.hashPassword(user.password);
-        console.log(`Hashed Password: ${user.password}`); // Log the hashed password
         const savedUser = await this.usersRepository.save(user);
         return savedUser.id;
     }
@@ -61,7 +58,7 @@ export class UserService {
             relations: {
                 tripsWithAccess: { trip: true },
             },
-        });
+        } as FindOneOptions<User>);
         return result.length > 0
         ? {
             // no password and username(already known is returned)
@@ -73,16 +70,16 @@ export class UserService {
         : null;
     }
 
-    async update(id: number, data: Partial<User>) {
+    async update(id: number, user: Partial<User>) {
         // Check if the username already exists only if userName is present in the data
-        if (data.userName && (await this.doesUsernameExist(data.userName)))
+        if (user.userName && (await this.doesUsernameExist(user.userName)))
             throw new ConflictException("Username");
 
         // Check if the username already exists only if userName is present in the data
-        if (data.email && (await this.doesEmailExist(data.email)))
+        if (user.email && (await this.doesEmailExist(user.email)))
             throw new ConflictException("Email");
 
-        return await this.usersRepository.update(id, data); // try catch needs await, because try catch cannot catch asyncronous exceptions
+        return await this.usersRepository.update(id, user); // try catch needs await, because try catch cannot catch asyncronous exceptions
     }
 
     async delete(id: number): Promise<void> {
