@@ -6,7 +6,7 @@ import {
 } from "typeorm";
 import { BaseEntity } from "../shared/base";
 import { Trip } from "./trip.entity";
-import { Location } from "./location.entity";
+import { Waypoint } from "./waypoint.entity";
 import { IsDate, IsNumber, IsString } from "class-validator";
 
 
@@ -15,14 +15,15 @@ import { IsDate, IsNumber, IsString } from "class-validator";
 export class TripStage extends BaseEntity {
     @Column()
     @IsString()
-    title: string;
+    index: number;
 
     @Column()
-    picture: Buffer;
+    @IsString()
+    title: string;
 
     @Column({ nullable: true })
     @IsString()
-    description?: string;
+    description: string;
 
     @Column()
     displayRoute: boolean;
@@ -33,14 +34,18 @@ export class TripStage extends BaseEntity {
 
     @Column({ nullable: true, type: "datetime" })
     @IsDate()
-    start?: Date;
+    start: Date;
 
     @Column({ nullable: true, type: "datetime" })
     @IsDate()
-    end?: Date;
+    end: Date;
 
-    @OneToMany(() => Location, (location) => location.stage, { cascade: ["insert", "update", "remove", "soft-remove", "recover"],  onDelete: 'CASCADE'  ,eager:true }) // eager resolves locations always (globally), when using get on trip
-    locations: Location[];
+    @Column()
+    @IsNumber()
+    day: number;
+
+    @OneToMany(() => Waypoint, (waypoint) => waypoint.stage, { cascade: ["insert", "update", "remove", "soft-remove", "recover"],  onDelete: 'CASCADE'  ,eager:true }) // eager resolves locations always (globally), when using get on trip
+    waypoints: Waypoint[];
 
     // many stages to one trip
     @ManyToOne(() => Trip, (trip) => trip.stages )

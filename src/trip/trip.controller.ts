@@ -19,7 +19,7 @@ import { TripService } from "./trip.service";
 import { Trip } from "./trip.entity";
 import { EntityPropertyNotFoundError } from "typeorm";
 import { TripStage } from "./trip-stage.entity";
-import { Location } from "./location.entity";
+import { Waypoint } from "./waypoint.entity";
 import { JwtAuthGuard } from "../auth/jwt-auth.guard";
 import { TripAccessService } from "./trip-access.service";
 import { TripAccess } from "./trip-access.entity";
@@ -235,14 +235,14 @@ export class TripController {
     async createLocations(
         @Param("tripId", ParseIntPipe) tripId: number,
         @Param("stageId", ParseIntPipe) stageId: number,
-        @Body() locations: Location[],
+        @Body() waypoints: Waypoint[],
     ): Promise<void> {
         try {
             // Create the locations inside the stage and save stage so relations in db are correct
             await this.tripService.insertMultipleLocations(
                 tripId,
                 stageId,
-                locations,
+                waypoints,
             );
         } catch (ex) {
             this.exceptionHandler(ex);

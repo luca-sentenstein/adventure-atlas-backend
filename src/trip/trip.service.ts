@@ -3,7 +3,7 @@ import { InjectRepository } from "@nestjs/typeorm";
 import { Trip } from "./trip.entity";
 import { In, Repository } from "typeorm";
 import { TripStage } from "./trip-stage.entity";
-import { Location } from "./location.entity";
+import { Waypoint } from "./waypoint.entity";
 
 @Injectable()
 export class TripService {
@@ -17,11 +17,11 @@ export class TripService {
     async insertMultipleLocations(
         tripId: number,
         stageId: number,
-        locations: Location[],
+        waypoints: Waypoint[],
     ): Promise<void> {
         const stageData = await this.tripStageRepository.findOne({
             where: { id: stageId }, // Assuming 'id' is the primary key of TripStage
-            relations: { locations: true }, // Ensure locations are loaded
+            relations: { waypoints: true }, // Ensure locations are loaded
         });
 
         if (!stageData) {
@@ -33,11 +33,11 @@ export class TripService {
             throw new Error("Trip not found");
         }
         console.log("tripId: " + tripId + " stageId: " + stageId);
-        console.log(typeof locations); // "number"
-        console.log(locations);
+        console.log(typeof waypoints); // "number"
+        console.log(waypoints);
 
         // add all locations to stage
-        stageData.locations = locations;
+        stageData.waypoints = waypoints;
 
         // Save the TripStage
         await this.tripStageRepository.save(stageData);
@@ -72,7 +72,7 @@ export class TripService {
             where: { id },
             relations: {
                 owner: true,
-                stages: { locations: true },
+                stages: { waypoints: true },
             },
             select: {
                 owner: {
@@ -88,7 +88,7 @@ export class TripService {
             where: { public: true },
             relations: {
                 owner: true,
-                stages: { locations: true },
+                stages: { waypoints: true },
             },
             select: {
                 owner: {
@@ -107,7 +107,7 @@ export class TripService {
             where: { id: In(tripIds) },
             relations: {
                 owner: true,
-                stages: { locations: true },
+                stages: { waypoints: true },
             },
             select: {
                 owner: {
@@ -125,7 +125,7 @@ export class TripService {
             ],
             relations: {
                 owner: true,
-                stages: { locations: true },
+                stages: { waypoints: true },
             },
             select: {
                 owner: {
