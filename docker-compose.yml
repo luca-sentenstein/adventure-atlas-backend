@@ -1,0 +1,14 @@
+version: '3.3'  # Specify the version of Docker Compose
+
+services:
+    app:
+        build:
+            context: .  # Use the current directory as the build context
+            dockerfile: Dockerfile  # Specify the Dockerfile to use
+        ports:
+            - "3000:3000"  # Map port 3000 on the host to port 3000 in the container
+        environment:
+            NODE_ENV: production  # Set environment variables if needed
+        volumes:
+            - .:/usr/src/app  # Mount the current directory to the container (optional, for development)
+        command: ["node", "dist/main"]  # Command to run the application
