@@ -1,9 +1,19 @@
 import { NestFactory } from "@nestjs/core";
 import { AppModule } from "./app.module";
 import { MyConfigService } from "./config/config.service";
+import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 
 async function bootstrap() {
     const app = await NestFactory.create(AppModule);
+
+    const config = new DocumentBuilder()
+        .setTitle('AdventureAtlas-Backend')
+        .setDescription('This is a overview of the backend API-Endpoints for the AdventureAtlas application')
+        .setVersion('1.0')
+        .addTag('api-doc')
+        .build();
+    const documentFactory = () => SwaggerModule.createDocument(app, config);
+    SwaggerModule.setup('api', app, documentFactory);
 
     // Access the ConfigService
     const configService = app.get(MyConfigService);
