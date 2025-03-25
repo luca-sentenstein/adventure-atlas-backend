@@ -1,11 +1,8 @@
 import {
-    BadRequestException,
     Body,
-    ConflictException,
     Controller,
     Delete,
     Get,
-    InternalServerErrorException,
     NotFoundException,
     Param,
     ParseIntPipe,
@@ -19,7 +16,6 @@ import {
 } from "@nestjs/common";
 import { TripService } from "./trip.service";
 import { Trip } from "./trip.entity";
-import { EntityPropertyNotFoundError } from "typeorm";
 import { TripStage } from "./trip-stage.entity";
 import { Waypoint } from "./waypoint.entity";
 import { JwtAuthGuard } from "../auth/jwt-auth.guard";
@@ -45,12 +41,7 @@ export class TripController {
         // find id of user in tripaccess by username
         // find out if user has write access on trip, else throw unauthorized
         // only owner can set read write
-        try {
-            return await this.tripAccessService.create(tripAccess);
-        } catch (ex) {
-            this.exceptionHandler(ex);
-        }
-
+        return await this.tripAccessService.create(tripAccess);
     }
 
     @UseGuards(JwtAuthGuard)
@@ -61,11 +52,9 @@ export class TripController {
         @Body() trip: Partial<Trip>,
     ): Promise<void> {
         this.tripAccessService.doesUserHaveRightsToEditTrip(request, tripId);
-        try {
+
             await this.tripService.update(tripId, trip);
-        } catch (ex) {
-            this.exceptionHandler(ex);
-        }
+
     }
 
     // set access of user for trip
@@ -95,11 +84,7 @@ export class TripController {
     // get all public trips
     @Get("discover")
     async getAllPublicTrips(): Promise<Trip[] | null | undefined> {
-        try {
-            return await this.tripService.readAllPublicTrips();
-        } catch (ex) {
-            this.exceptionHandler(ex);
-        }
+        return await this.tripService.readAllPublicTrips();
     }
 
     // get all trips by user id
@@ -109,7 +94,6 @@ export class TripController {
         @Req() request: Request,
     ): Promise<Trip[] | null | undefined> {
         const userId = this.tripService.extractUserId(request)
-        try {
             const userTripAccesses =
                 await this.tripAccessService.readAllByUserId(userId);
 
@@ -152,11 +136,7 @@ export class TripController {
             if (trips) {
                 return trips;
             } else throw new NotFoundException();
-        } catch (ex) {
-            this.exceptionHandler(ex);
         }
-    }
-
 
 
     // User starts creating trip, create base trip first
@@ -165,12 +145,8 @@ export class TripController {
     @Post()
     @UsePipes(new ValidationPipe({transform: true}))
     async createTrip(@Req() request: Request, @Body() trip: Partial<Trip>): Promise<void> {
-        try {
-            const userId = this.tripService.extractUserId(request);
-            await this.tripService.createTrip(userId, trip);
-        } catch (ex) {
-            this.exceptionHandler(ex);
-        }
+        const userId = this.tripService.extractUserId(request);
+        await this.tripService.createTrip(userId, trip);
     }
 
     // delete trip
@@ -202,12 +178,8 @@ export class TripController {
         @Param("id", ParseIntPipe) id: number,
         @Body() tripStage: Partial<TripStage>,
     ): Promise<void> {
-        try {
-            // Create the trip
-            await this.tripService.createStage(id, tripStage);
-        } catch (ex) {
-            this.exceptionHandler(ex);
-        }
+        await this.tripService.createStage(id, tripStage);
+
     }
 
     // create locations of a stage
@@ -218,16 +190,12 @@ export class TripController {
         @Param("stageId", ParseIntPipe) stageId: number,
         @Body() waypoints: Waypoint[],
     ): Promise<void> {
-        try {
             // Create the locations inside the stage and save stage so relations in db are correct
             await this.tripService.insertMultipleLocations(
                 tripId,
                 stageId,
                 waypoints,
             );
-        } catch (ex) {
-            this.exceptionHandler(ex);
-        }
     }
 
     // create a stage without the locations, just basic information like description etc.
@@ -237,12 +205,9 @@ export class TripController {
         @Param("id", ParseIntPipe) id: number,
         @Body() tripStage: Partial<TripStage>,
     ): Promise<void> {
-        try {
             // Create the trip
             await this.tripService.createStage(id, tripStage);
-        } catch (ex) {
-            this.exceptionHandler(ex);
-        }
+
     }
 
     // get data of trip (when opening trips)
@@ -250,38 +215,10 @@ export class TripController {
     async getTrip(
         @Param("id", ParseIntPipe) id: number,
     ): Promise<Trip | null | undefined> {
-        try {
+
             const trip = await this.tripService.readOne(id);
             if (trip) {
                 return trip;
             } else throw new NotFoundException();
-        } catch (ex) {
-            this.exceptionHandler(ex);
-        }
-    }
-
-    exceptionHandler(ex: unknown) {
-        // no break needed because exception (The adequate HTTP error is returned)
-        console.log(ex);
-        console.log(ex instanceof NotFoundException);
-        switch (true) {
-            case ex instanceof EntityPropertyNotFoundError:
-                throw new BadRequestException(
-                    "The JSON data format is invalid. " + ex.message,
-                );
-            case ex instanceof ConflictException:
-                throw new ConflictException(
-                    "The " + ex.message + " already exists.",
-                );
-            case ex instanceof NotFoundException:
-                throw new NotFoundException(ex.message);
-            //throw new NotFoundException("The Trip does not exist.");
-            default:
-                // Handle other types of errors, someone can crash the server otherwise!
-                throw new InternalServerErrorException(
-                    "An unexpected error occurred: " +
-                    (ex instanceof Error ? ex.message : String(ex)),
-                );
-        }
     }
 }

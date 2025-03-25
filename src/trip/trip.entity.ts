@@ -1,9 +1,9 @@
-import { Entity, Column, ManyToOne, OneToMany, JoinColumn } from "typeorm";
+import { Column, Entity, ManyToOne, OneToMany } from "typeorm";
 import { BaseEntity } from "../shared/base";
 import { User } from "../user/user.entity";
 import { TripStage } from "./trip-stage.entity";
 import { IsArray, IsBoolean, IsDate, IsInt, IsString } from "class-validator";
-import { Expose, Type } from "class-transformer";
+import { Type } from "class-transformer";
 
 @Entity()
 export class Trip extends BaseEntity {
@@ -24,10 +24,10 @@ export class Trip extends BaseEntity {
     @IsString()
     description: string;
 
-    @Column({ nullable: true , type: 'blob' })
+    @Column({nullable: true, type: 'blob'})
     image?: Buffer;
 
-    @Column({ default: false })
+    @Column({default: false})
     @IsBoolean()
     public: boolean;
 
@@ -37,7 +37,7 @@ export class Trip extends BaseEntity {
 
     // cascade: true automatically inserts the stages, when a trip gets saved
     // one trip many tripstages
-    @OneToMany(() => TripStage, (stage) => stage.trip, { cascade: true })
+    @OneToMany(() => TripStage, (stage) => stage.trip, {cascade: true})
     @IsArray()
     @Type(() => TripStage)
     stages: TripStage[];
