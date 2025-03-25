@@ -7,7 +7,7 @@ import { TripStage } from "./trip-stage.entity";
 @Entity()
 export class Waypoint extends BaseEntity {
     @Column({ nullable: true })
-    @IsString()
+    @IsNumber()
     index: number;
 
     @Column({ nullable: true })

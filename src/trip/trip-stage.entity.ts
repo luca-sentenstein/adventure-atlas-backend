@@ -34,11 +34,11 @@ export class TripStage extends BaseEntity {
 
     @Column({ nullable: true, type: "datetime" })
     @IsDate()
-    start: Date;
+    start?: Date;
 
     @Column({ nullable: true, type: "datetime" })
     @IsDate()
-    end: Date;
+    end?: Date;
 
     @Column()
     @IsNumber()
