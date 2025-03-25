@@ -7,12 +7,14 @@ import { TripStage } from './trip-stage.entity';
 import { TripController } from './trip.controller';
 import { Trip } from './trip.entity';
 import { TripService } from './trip.service';
+import { UserService } from '../user/user.service';
+import { User } from '../user/user.entity';
 
 @Module({
-    imports: [TypeOrmModule.forFeature([Trip, TripStage, TripAccess, Waypoint])],
+    imports: [TypeOrmModule.forFeature([Trip, TripStage, TripAccess, Waypoint,User])],
     controllers: [TripController],
-    providers: [TripService, TripAccessService],
-    exports: [TripService, TripAccessService],
+    providers: [TripService, TripAccessService,UserService],
+    exports: [TripService, TripAccessService,UserService],
 })
 export class TripModule {
 }

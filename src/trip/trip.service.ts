@@ -4,6 +4,8 @@ import { Trip } from "./trip.entity";
 import { In, Repository } from "typeorm";
 import { TripStage } from "./trip-stage.entity";
 import { Waypoint } from "./waypoint.entity";
+import { UserService } from '../user/user.service';
+import { User } from '../user/user.entity';
 
 @Injectable()
 export class TripService {
@@ -12,7 +14,27 @@ export class TripService {
         private tripsRepository: Repository<Trip>,
         @InjectRepository(TripStage)
         private tripStageRepository: Repository<TripStage>,
+        private readonly userService: UserService
     ) {}
+
+    async createTrip(userId: number, tripData: Partial<Trip>): Promise<void> {
+        // Fetch the user from the database
+        const partialUser = await this.userService.readOneById(userId);
+        if (!partialUser) {
+            throw new Error("User not found");
+        }
+
+        // Create a new User instance
+        const user = new User();
+        Object.assign(user, partialUser); // Copy properties from partialUser to user
+
+        console.log(user);
+        // Assign the user instance to the trip's owner
+        tripData.owner = user;
+
+        // Create the trip
+        await this.create(tripData); // Assuming this.create is the method to save the trip
+    }
 
     async insertMultipleLocations(
         tripId: number,

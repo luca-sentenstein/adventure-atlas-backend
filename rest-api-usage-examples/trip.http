@@ -1,9 +1,9 @@
 ### Create a trip
 POST http://localhost:3000/trip
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImlsaWtlYWR2ZW50dXJlIiwiaWQiOjEsImlhdCI6MTc0Mjg2NjM0MywiZXhwIjoxNzQyODY5OTQzfQ.mkAMQgeoNZe6d-nOmP6mHJDLoV-ztigm0wzThU8zP04
 Content-Type: application/json
 
 {
-    "owner" : 1,
     "title" : "Big city tour",
     "subtitle" : "a city trip to look around in the city",
     "description" : "We go on a trip through a city, there is a interesting building included",

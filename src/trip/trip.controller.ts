@@ -23,6 +23,8 @@ import { Waypoint } from "./waypoint.entity";
 import { JwtAuthGuard } from "../auth/jwt-auth.guard";
 import { TripAccessService } from "./trip-access.service";
 import { TripAccess } from "./trip-access.entity";
+import { UserService } from '../user/user.service';
+import { User } from '../user/user.entity';
 
 @Controller("trip")
 export class TripController {
@@ -52,14 +54,6 @@ export class TripController {
             if (tripAcc) {
                 await this.tripAccessService.delete(tripAcc.id);
             } else throw NotFoundException;
-        }
-
-        try {
-            // Create the trip
-
-
-        } catch (ex) {
-            this.exceptionHandler(ex);
         }
     }
 
@@ -132,14 +126,23 @@ export class TripController {
         }
     }
 
+    extractUserId(request: Request): number
+    {
+        const userId = (request as { user?: { id?: number } }).user?.id; // Assuming 'id' is the user ID in the JWT payload
+        if (!userId)
+            throw new NotFoundException("User ID not found in token");
+        return userId;
+    }
+
     // User starts creating trip, create base trip first
     // create a whole trip
+    @UseGuards(JwtAuthGuard)
     @Post()
     @UsePipes(new ValidationPipe({transform: true}))
-    async createTrip(@Body() trip: Partial<Trip>): Promise<void> {
+    async createTrip(@Req() request: Request, @Body() trip: Partial<Trip>): Promise<void> {
         try {
-            // Create the trip
-            await this.tripService.create(trip);
+            const userId = this.extractUserId(request);
+            await this.tripService.createTrip(userId, trip);
         } catch (ex) {
             this.exceptionHandler(ex);
         }
@@ -189,7 +192,6 @@ export class TripController {
         // delete stage
         await this.tripService.deleteStage(stageId);
     }
-
 
 
     // set access of user for trip
