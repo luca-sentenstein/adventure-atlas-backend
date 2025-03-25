@@ -19,7 +19,7 @@ export class Location extends BaseEntity {
     Lng: number;
 
     // many locations to one stage
-    @ManyToOne(() => TripStage, (stage) => stage.locations)
+    @ManyToOne(() => TripStage, (stage) => stage.locations ,{ onDelete: 'CASCADE' })
     @Type(() => TripStage)
     stage: TripStage;
 }

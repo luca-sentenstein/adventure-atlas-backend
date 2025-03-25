@@ -2,7 +2,7 @@ import {
     BadRequestException,
     Body,
     ConflictException,
-    Controller,
+    Controller, Delete,
     Get,
     InternalServerErrorException,
     NotFoundException,
@@ -37,6 +37,17 @@ export class UserController {
         } catch (ex) {
             this.exceptionHandler(ex);
         }
+    }
+
+    @UseGuards(JwtAuthGuard)
+    @Delete()
+    async deleteUser(@Req() request: Request): Promise<void> {
+        const userId = (request as any).user?.id; // Assuming 'sub' is the user ID in the JWT payload
+
+        if (!userId) {
+            throw new NotFoundException('User ID not found in token');
+        }
+        await this.userService.delete(userId);
     }
 
     // After successful login

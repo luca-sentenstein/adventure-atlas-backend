@@ -2,7 +2,7 @@ import {
     BadRequestException,
     Body,
     ConflictException,
-    Controller,
+    Controller, Delete,
     Get,
     InternalServerErrorException,
     NotFoundException,
@@ -10,7 +10,7 @@ import {
     ParseIntPipe,
     Patch,
     Post,
-    Req,
+    Req, UnauthorizedException,
     UseGuards,
     UsePipes,
     ValidationPipe,
@@ -29,7 +29,39 @@ export class TripController {
     constructor(
         private readonly tripService: TripService,
         private readonly tripAccessService: TripAccessService,
-    ) {}
+    ) {
+    }
+
+    // set access of user for trip
+    @UseGuards(JwtAuthGuard)
+    @Delete("access")
+    async deleteTripAccess(
+        @Req() request: Request,
+        @Body() tripAccess: TripAccess,
+    ): Promise<void> {
+        const userId = (request as { user?: { id?: number } }).user?.id; // Assuming 'id' is the user ID in the JWT payload
+        console.log("Trip access delete");
+        if (!userId) {
+            throw new NotFoundException("User ID not found in token");
+        }
+        // find out if user has write access on trip, else throw unauthorized
+        // only owner can set read write
+        // Step 1: Find the tripAccess entry
+        if (tripAccess.user && tripAccess.trip) {
+            const tripAcc = await this.tripAccessService.findByUserAndTrip(tripAccess.user.id, tripAccess.trip.id);
+            if (tripAcc) {
+                await this.tripAccessService.delete(tripAcc.id);
+            } else throw NotFoundException;
+        }
+
+        try {
+            // Create the trip
+
+
+        } catch (ex) {
+            this.exceptionHandler(ex);
+        }
+    }
 
     // get all public trips
     @Get("discover")
@@ -60,7 +92,7 @@ export class TripController {
             const ownerTrips = await this.tripService.getTripsByOwner(userId);
             const ownerTripAccesses = ownerTrips.map((trip) => ({
                 trip: trip,
-                user: { id: userId },
+                user: {id: userId},
             }));
 
             // Combine both TripAccess lists
@@ -103,7 +135,7 @@ export class TripController {
     // User starts creating trip, create base trip first
     // create a whole trip
     @Post()
-    @UsePipes(new ValidationPipe({ transform: true }))
+    @UsePipes(new ValidationPipe({transform: true}))
     async createTrip(@Body() trip: Partial<Trip>): Promise<void> {
         try {
             // Create the trip
@@ -112,6 +144,53 @@ export class TripController {
             this.exceptionHandler(ex);
         }
     }
+
+    // delete trip
+    @UseGuards(JwtAuthGuard)
+    @Delete(":id")
+    async deleteTrip(@Req() request: Request,
+                     @Param("id", ParseIntPipe) tripId: number,): Promise<void> {
+        const userId = (request as { user?: { id?: number } }).user?.id; // Assuming 'id' is the user ID in the JWT payload
+
+        if (!userId) {
+            throw new NotFoundException("User ID not found in token");
+        }
+
+        // Check if the user is the owner of the trip with the given tripId
+        const isOwner = await this.tripService.isOwner(userId, tripId);
+        if (!isOwner) {
+            throw new UnauthorizedException(
+                "User does not have ownership of the specified trip",
+            );
+        }
+        // delete trip
+        await this.tripService.deleteTrip(tripId);
+    }
+
+    // delete trip
+    @UseGuards(JwtAuthGuard)
+    @Delete(":tripId/stages/:stageId")
+    async deleteStage(@Req() request: Request,
+                      @Param("tripId", ParseIntPipe) tripId: number,
+                      @Param("stageId", ParseIntPipe) stageId: number,): Promise<void> {
+        const userId = (request as { user?: { id?: number } }).user?.id; // Assuming 'id' is the user ID in the JWT payload
+
+        if (!userId) {
+            throw new NotFoundException("User ID not found in token");
+        }
+
+        // Check if the user is the owner of the trip with the given tripId
+        const isOwner = await this.tripService.isOwner(userId, tripId);
+        if (!isOwner) {
+            throw new UnauthorizedException(
+                "User does not have ownership of the specified trip",
+            );
+        }
+        // delete stage
+        await this.tripService.deleteStage(stageId);
+    }
+
+
 
     // set access of user for trip
     @UseGuards(JwtAuthGuard)
@@ -128,16 +207,16 @@ export class TripController {
         // find out if user has write access on trip, else throw unauthorized
         // only owner can set read write
         try {
-            // Create the trip
             await this.tripAccessService.create(tripAccess);
         } catch (ex) {
             this.exceptionHandler(ex);
         }
     }
 
+
     // create a stage without the route
     @Post(":id/newStage")
-    @UsePipes(new ValidationPipe({ transform: true }))
+    @UsePipes(new ValidationPipe({transform: true}))
     async createStage(
         @Param("id", ParseIntPipe) id: number,
         @Body() tripStage: Partial<TripStage>,
@@ -152,7 +231,7 @@ export class TripController {
 
     // create locations of a stage
     @Post(":tripId/stages/:stageId/locations")
-    @UsePipes(new ValidationPipe({ transform: true }))
+    @UsePipes(new ValidationPipe({transform: true}))
     async createLocations(
         @Param("tripId", ParseIntPipe) tripId: number,
         @Param("stageId", ParseIntPipe) stageId: number,
@@ -172,7 +251,7 @@ export class TripController {
 
     // create a stage without the locations, just basic information like description etc.
     @Patch(":id/newStage")
-    @UsePipes(new ValidationPipe({ transform: true }))
+    @UsePipes(new ValidationPipe({transform: true}))
     async updateStage(
         @Param("id", ParseIntPipe) id: number,
         @Body() tripStage: Partial<TripStage>,
@@ -218,7 +297,7 @@ export class TripController {
                 // Handle other types of errors, someone can crash the server otherwise!
                 throw new InternalServerErrorException(
                     "An unexpected error occurred: " +
-                        (ex instanceof Error ? ex.message : String(ex)),
+                    (ex instanceof Error ? ex.message : String(ex)),
                 );
         }
     }

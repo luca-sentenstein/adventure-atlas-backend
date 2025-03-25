@@ -20,8 +20,8 @@ export class TripStage extends BaseEntity {
     @Column()
     picture: Buffer;
 
-    @Column({ nullable: true })  
-    @IsString()  
+    @Column({ nullable: true })
+    @IsString()
     description?: string;
 
     @Column()
@@ -39,10 +39,10 @@ export class TripStage extends BaseEntity {
     @IsDate()
     end?: Date;
 
-    @OneToMany(() => Location, (location) => location.stage, { cascade: true, eager: true }) // eager resolves locations always (globally), when using get on trip
+    @OneToMany(() => Location, (location) => location.stage, { cascade: ["insert", "update", "remove", "soft-remove", "recover"],  onDelete: 'CASCADE'  ,eager:true }) // eager resolves locations always (globally), when using get on trip
     locations: Location[];
 
     // many stages to one trip
-    @ManyToOne(() => Trip, (trip) => trip.stages)
+    @ManyToOne(() => Trip, (trip) => trip.stages )
     trip: Trip;
 }

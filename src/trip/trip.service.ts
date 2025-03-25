@@ -135,11 +135,48 @@ export class TripService {
         });
     }
 
+
+    async isOwner(userId: number, tripId: number): Promise<boolean> {
+        const trip = await this.tripsRepository.findOne({
+            where: {id: tripId},
+            relations: {owner: true},
+        });
+
+        if (!trip || !trip.owner) {
+            return false;
+        }
+
+        return trip.owner.id === userId;
+    }
+
     async update(id: number, data: Partial<Trip>) {
         return await this.tripsRepository.update(id, data);
     }
 
-    async delete(id: number): Promise<void> {
+    async deleteStage(id: number): Promise<void> {
+
+
+
+            // Delete the tripStage
+            await this.tripStageRepository.delete(id);
+
+    }
+
+    async deleteTrip(id: number): Promise<void> {
+        console.log("delete trip with id: " + id);
+
+        // Find and delete all related TripStages for the Trip
+        const tripStages = await this.tripStageRepository.find({
+            where: {trip: {id}}, // Assuming trip is a relation in TripStage
+        });
+
+        if (tripStages?.length) {
+            for (const tripStage of tripStages) {
+                await this.tripStageRepository.delete(tripStage.id);
+            }
+        }
+
+        // Finally, delete the Trip itself
         await this.tripsRepository.delete(id);
     }
 }

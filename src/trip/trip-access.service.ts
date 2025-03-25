@@ -74,7 +74,24 @@ export class TripAccessService {
     }
 
     async create(tripAccess: TripAccess): Promise<TripAccess> {
-        return await this.tripAccessRepository.save(tripAccess);
+        //return await this.tripAccessRepository.save(tripAccess);
+        // Step 1: Check for existing entry
+        const existingEntry = await this.tripAccessRepository.findOne({
+            where: { user: { id: tripAccess.user.id }, trip: { id: tripAccess.trip.id } },
+        });
+
+        if (existingEntry) {
+            // Step 2: Update the existing entry
+            existingEntry.user = tripAccess.user; // Update fields as necessary
+            existingEntry.trip = tripAccess.trip;
+            existingEntry.accessLevel = tripAccess.accessLevel;
+            // Add any other fields you want to update
+
+            return await this.tripAccessRepository.save(existingEntry);
+        } else {
+            // Step 3: Create a new entry
+            return await this.tripAccessRepository.save(tripAccess);
+        }
     }
 
     // (!) Attention: If you use this api in production, implement a "where" filter
@@ -104,5 +121,9 @@ export class TripAccessService {
 
     async delete(id: number): Promise<void> {
         await this.tripAccessRepository.delete(id);
+    }
+
+    async findByUserAndTrip(userId: number, tripId: number): Promise<TripAccess | null> {
+        return this.tripAccessRepository.findOne({ where: { user: { id: userId }, trip: { id: tripId } } });
     }
 }
