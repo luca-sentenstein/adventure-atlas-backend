@@ -2,7 +2,8 @@ import {
     BadRequestException,
     Body,
     ConflictException,
-    Controller, Delete,
+    Controller,
+    Delete,
     Get,
     InternalServerErrorException,
     NotFoundException,
@@ -10,7 +11,8 @@ import {
     ParseIntPipe,
     Patch,
     Post,
-    Req, UnauthorizedException,
+    Req,
+    UnauthorizedException,
     UseGuards,
     UsePipes,
     ValidationPipe,
@@ -22,7 +24,7 @@ import { TripStage } from "./trip-stage.entity";
 import { Waypoint } from "./waypoint.entity";
 import { JwtAuthGuard } from "../auth/jwt-auth.guard";
 import { TripAccessService } from "./trip-access.service";
-import { TripAccess } from "./trip-access.entity";
+import { TripAccess, TripAccessDto } from "./trip-access.entity";
 
 @Controller("trip")
 export class TripController {
@@ -32,6 +34,25 @@ export class TripController {
     ) {
     }
 
+    // set access of user for trip
+    @UseGuards(JwtAuthGuard)
+    @Post("access")
+    async createTripAccess(
+        @Req() request: Request,
+        @Body() tripAccess: TripAccessDto,
+    ): Promise<TripAccess | undefined | null> {
+        this.tripAccessService.doesUserHaveRightsToEditTrip(request, tripAccess.trip);
+        // find id of user in tripaccess by username
+        // find out if user has write access on trip, else throw unauthorized
+        // only owner can set read write
+        try {
+            return await this.tripAccessService.create(tripAccess);
+        } catch (ex) {
+            this.exceptionHandler(ex);
+        }
+
+    }
+
     @UseGuards(JwtAuthGuard)
     @Patch(":tripId")
     async updateTrip(
@@ -39,7 +60,7 @@ export class TripController {
         @Param("tripId", ParseIntPipe) tripId: number,
         @Body() trip: Partial<Trip>,
     ): Promise<void> {
-        this.tripService.doesUserHaveRightsToEditTrip(request, tripId);
+        this.tripAccessService.doesUserHaveRightsToEditTrip(request, tripId);
         try {
             await this.tripService.update(tripId, trip);
         } catch (ex) {
@@ -49,21 +70,26 @@ export class TripController {
 
     // set access of user for trip
     @UseGuards(JwtAuthGuard)
-    @Delete("access")
+    @Delete("access/:tripAccessId")
     async deleteTripAccess(
         @Req() request: Request,
+        @Param("tripAccessId", ParseIntPipe) tripAccessId: number,
         @Body() tripAccess: TripAccess,
     ): Promise<void> {
+        await this.removeTripAccess(request, tripAccessId);
+    }
+
+    async removeTripAccess(request: Request, tripAccessId: number) {
         // find out if user has write access on trip, else throw unauthorized
         // only owner can set read write
-        this.tripService.doesUserHaveRightsToUpdateAccess(request, tripAccess.trip.id);
-        // Step 1: Find the tripAccess entry
-        if (tripAccess.user && tripAccess.trip) {
-            const tripAcc = await this.tripAccessService.findByUserAndTrip(tripAccess.user.id, tripAccess.trip.id);
-            if (tripAcc) {
-                await this.tripAccessService.delete(tripAcc.id);
-            } else throw NotFoundException;
+        if (!(this.tripService.doesUserHaveRightsToUpdateAccess(request, tripAccessId))) {
+            throw new UnauthorizedException()
         }
+        const tripAccess = await this.tripAccessService.readOne(tripAccessId);
+        // Step 1: Find the tripAccess entry
+        if (tripAccess) {
+            await this.tripAccessService.delete(tripAccessId);
+        } else throw new NotFoundException();
     }
 
     // get all public trips
@@ -152,7 +178,7 @@ export class TripController {
     @Delete(":id")
     async deleteTrip(@Req() request: Request,
                      @Param("id", ParseIntPipe) tripId: number,): Promise<void> {
-        this.tripService.doesUserHaveRightsToEditTrip(request, tripId);
+        this.tripAccessService.doesUserHaveRightsToEditTrip(request, tripId);
         // delete trip
         await this.tripService.deleteTrip(tripId);
     }
@@ -166,24 +192,6 @@ export class TripController {
         this.tripService.doesUserHaveRightsToUpdateAccess(request, tripId);
         // delete stage
         await this.tripService.deleteStage(stageId);
-    }
-
-
-    // set access of user for trip
-    @UseGuards(JwtAuthGuard)
-    @Post("access")
-    async createTripAccess(
-        @Req() request: Request,
-        @Body() tripAccess: TripAccess,
-    ): Promise<void> {
-        this.tripService.doesUserHaveRightsToEditTrip(request, tripAccess.trip.id);
-        // find out if user has write access on trip, else throw unauthorized
-        // only owner can set read write
-        try {
-            await this.tripAccessService.create(tripAccess);
-        } catch (ex) {
-            this.exceptionHandler(ex);
-        }
     }
 
 
@@ -254,6 +262,8 @@ export class TripController {
 
     exceptionHandler(ex: unknown) {
         // no break needed because exception (The adequate HTTP error is returned)
+        console.log(ex);
+        console.log(ex instanceof NotFoundException);
         switch (true) {
             case ex instanceof EntityPropertyNotFoundError:
                 throw new BadRequestException(

@@ -10,8 +10,9 @@ import { TripService } from './trip.service';
 import { UserService } from '../user/user.service';
 import { User } from '../user/user.entity';
 
+
 @Module({
-    imports: [TypeOrmModule.forFeature([Trip, TripStage, TripAccess, Waypoint,User])],
+    imports: [TypeOrmModule.forFeature([Trip, TripStage, Waypoint,User,TripAccess])],
     controllers: [TripController],
     providers: [TripService, TripAccessService,UserService],
     exports: [TripService, TripAccessService,UserService],
