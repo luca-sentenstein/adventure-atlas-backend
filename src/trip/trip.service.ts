@@ -173,8 +173,9 @@ export class TripService {
         return trip.owner.id === userId;
     }
 
-    async update(id: number, data: Partial<Trip>) {
-        return await this.tripsRepository.update(id, data);
+    async update(id: number, trip: Partial<Trip>) {
+        trip.updatedAt = new Date();
+        return await this.tripsRepository.update(id, trip);
     }
 
     async deleteStage(id: number): Promise<void> {
