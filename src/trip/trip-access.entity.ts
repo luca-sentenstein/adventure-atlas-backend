@@ -3,6 +3,12 @@ import { BaseEntity } from "../shared/base";
 import { User } from "../user/user.entity";
 import { Trip } from "./trip.entity";
 
+export class TripAccessDto {
+    userName: string;
+    trip: number;
+    accessLevel: string;
+}
+
 @Entity()
 export class TripAccess extends BaseEntity {
     // many users with access on one trip

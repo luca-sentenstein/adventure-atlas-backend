@@ -1,14 +1,19 @@
-import { Injectable } from "@nestjs/common";
+import { Injectable, NotFoundException, UnauthorizedException } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
-import { TripAccess } from "./trip-access.entity";
+import { TripAccess, TripAccessDto } from "./trip-access.entity";
 import { In, Repository } from "typeorm";
 import { Trip } from "./trip.entity";
+import { UserService } from '../user/user.service';
+import { TripService } from './trip.service';
+
 
 @Injectable()
 export class TripAccessService {
     constructor(
         @InjectRepository(TripAccess)
         private tripAccessRepository: Repository<TripAccess>,
+        private readonly userService: UserService,
+        private readonly tripService: TripService,
     ) {}
 
     // get all tripids that a user has access to (all table entries with userid)
@@ -73,25 +78,47 @@ export class TripAccessService {
         return trips;
     }
 
-    async create(tripAccess: TripAccess): Promise<TripAccess> {
+
+    async create(tripAccessDto: TripAccessDto): Promise<TripAccess | null> {
+
+        console.log("userName:" + tripAccessDto.userName);
         //return await this.tripAccessRepository.save(tripAccess);
+        const user = await this.userService.readOneByUsername(tripAccessDto.userName);
+        if (!user) {
+            throw new NotFoundException()
+        }
+
+        const trip = await this.tripService.readOne(tripAccessDto.trip);
+        if (!trip) {
+            throw new NotFoundException()
+        }
         // Step 1: Check for existing entry
         const existingEntry = await this.tripAccessRepository.findOne({
-            where: { user: { id: tripAccess.user.id }, trip: { id: tripAccess.trip.id } },
+            where: {user: {id: user.id}, trip: {id: tripAccessDto.trip}},
         });
 
+
+
+        console.log(existingEntry);
+        // This is the entity and not the Dto
+        const tripAccess = new TripAccess();
         if (existingEntry) {
             // Step 2: Update the existing entry
-            existingEntry.user = tripAccess.user; // Update fields as necessary
-            existingEntry.trip = tripAccess.trip;
-            existingEntry.accessLevel = tripAccess.accessLevel;
+            existingEntry.user = user; // Update fields as necessary
+            existingEntry.trip = trip;
+            existingEntry.accessLevel = tripAccessDto.accessLevel as "read" | "write";
             // Add any other fields you want to update
 
-            return await this.tripAccessRepository.save(existingEntry);
+            await this.tripAccessRepository.save(existingEntry);
+
         } else {
+            tripAccess.user = user; // Update fields as necessary
+            tripAccess.trip = trip;
+            tripAccess.accessLevel = tripAccessDto.accessLevel as "read" | "write";
             // Step 3: Create a new entry
-            return await this.tripAccessRepository.save(tripAccess);
+            await this.tripAccessRepository.save(tripAccess);
         }
+        return this.findByUserAndTrip(user.id, tripAccessDto.trip);
     }
 
     // (!) Attention: If you use this api in production, implement a "where" filter
@@ -124,7 +151,22 @@ export class TripAccessService {
     }
 
     async findByUserAndTrip(userId: number, tripId: number): Promise<TripAccess | null> {
-        return this.tripAccessRepository.findOne({ where: { user: { id: userId }, trip: { id: tripId } } });
+        return this.tripAccessRepository.findOne({
+            where: {user: {id: userId}, trip: {id: tripId}},
+            relations: {
+                trip: true,
+                user: true,
+            },
+            select: {
+                user: {
+                    id: true,
+                    userName: true// Only include the owner's id
+                },
+                trip: {
+                    id: true, // Only include the owner's id
+                },
+            },// Lade die zugehörige User-Entität
+        });
     }
 
     async isWriteAccess(userId: number, tripId: number): Promise<boolean> {
@@ -133,4 +175,18 @@ export class TripAccessService {
             return false;
         return tripaccess.accessLevel == "write";
     }
+
+    doesUserHaveRightsToEditTrip(request: Request, tripId): boolean {
+        const userId = this.tripService.extractUserId(request)
+        // User has Access by Tripaccess write
+        if(!(this.isWriteAccess(userId, tripId)))
+            // throw new UnauthorizedException()
+            // User has Access by Tripaccess write
+            if (!(this.tripService.isOwner(userId, tripId)))
+                throw new UnauthorizedException()
+        return true;
+    }
+
+
+
 }

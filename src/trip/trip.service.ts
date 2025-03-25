@@ -16,7 +16,6 @@ export class TripService {
         @InjectRepository(TripStage)
         private tripStageRepository: Repository<TripStage>,
         private readonly userService: UserService,
-        private readonly tripAccessService: TripAccessService
     ) {}
 
     async createTrip(userId: number, tripData: Partial<Trip>): Promise<void> {
@@ -214,16 +213,7 @@ export class TripService {
         return true;
     }
 
-    doesUserHaveRightsToEditTrip(request: Request, tripId): boolean {
-        const userId = this.extractUserId(request)
-            // User has Access by Tripaccess write
-            if(!(this.tripAccessService.isWriteAccess(userId, tripId)))
-                throw new UnauthorizedException()
-            // User has Access by Tripaccess write
-            if (!(this.isOwner(userId, tripId)))
-                throw new UnauthorizedException()
-        return true;
-    }
+
 
     extractUserId(request: Request): number {
         const userId = (request as { user?: { id?: number } }).user?.id; // Assuming 'id' is the user ID in the JWT payload
