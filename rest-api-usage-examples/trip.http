@@ -7,7 +7,8 @@ Content-Type: application/json
     "title" : "Big city tour",
     "subtitle" : "a city trip to look around in the city",
     "description" : "We go on a trip through a city, there is a interesting building included",
-    "public" : true
+    "public" : true,
+    "startDate": "2023-03-25T14:30:00Z"
 }
 
 ### JUST FOR TESTING: Get a trip
@@ -50,13 +51,15 @@ POST http://localhost:3000/trip/1/newStage
 Content-Type: application/json
 
 {
+  "index" : 1,
   "title": "Stage 3",
   "picture": "base64encodedimage",
   "description": "This is a new stage",
   "displayRoute": true,
   "cost": 100,
   "start": "2023-10-01T00:00:00Z",
-  "end": "2023-10-02T00:00:00Z"
+  "end": "2023-10-02T00:00:00Z",
+  "day" : 1
 }
 
 ### Add a locations to stage
@@ -65,14 +68,16 @@ Content-Type: application/json
 
 [
     {
+        "index": 2,
         "name": "Location 43543543",
-        "Lat": -71.0589,
-        "Lng": 42.3601
+        "lat": -71.0589,
+        "lng": 42.3601
     },
     {
+        "index": 1,
         "name": "Location 35445",
-        "Lat": -71.0589,
-        "Lng": 42.3601
+        "lat": -71.0589,
+        "lng": 42.3601
     }
 ]
 
