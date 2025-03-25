@@ -12,7 +12,7 @@ export class TripAccessDto {
 @Entity()
 export class TripAccess extends BaseEntity {
     // many users with access on one trip
-    @ManyToOne(() => Trip, { cascade: true })
+    @ManyToOne(() => Trip, { cascade: true , onDelete: "CASCADE" })
     trip: Trip;
 
     // one user can have many accesses to different trips
