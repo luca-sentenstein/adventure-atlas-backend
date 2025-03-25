@@ -1,12 +1,11 @@
 import { Injectable, NotFoundException, UnauthorizedException } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Trip } from "./trip.entity";
-import { In, Repository } from "typeorm";
+import { FindOneOptions, In, Repository } from "typeorm";
 import { TripStage } from "./trip-stage.entity";
 import { Waypoint } from "./waypoint.entity";
 import { UserService } from '../user/user.service';
 import { User } from '../user/user.entity';
-import { TripAccessService } from './trip-access.service';
 
 @Injectable()
 export class TripService {
@@ -102,7 +101,7 @@ export class TripService {
                     id: true, // Only select the owner's id
                 },
             },
-        });
+        } as FindOneOptions<Trip>);
     }
 
     // get all public trips
@@ -118,13 +117,13 @@ export class TripService {
                     id: true, // Only select the owner's id
                 },
             },
-        });
+        } as FindOneOptions<Trip>);
     }
 
 
 
 
-    // get all trips by tripid list
+    // get all trips by tripId list
     async readByIds(tripIds: number[]): Promise<Trip[]> {
         return await this.tripsRepository.find({
             where: { id: In(tripIds) },
@@ -138,7 +137,7 @@ export class TripService {
                     userName: true,
                 },
             },
-        });
+        } as FindOneOptions<Trip>);
     }
 
     async getTripsByOwner(userId: number): Promise<Trip[]> {
@@ -155,7 +154,7 @@ export class TripService {
                     id: true, // Only include the owner's id
                 },
             },
-        });
+        } as FindOneOptions<Trip>);
     }
 
 
@@ -163,7 +162,7 @@ export class TripService {
         const trip = await this.tripsRepository.findOne({
             where: {id: tripId},
             relations: {owner: true},
-        });
+        } as FindOneOptions<Trip>);
 
         if (!trip || !trip.owner) {
             return false;
@@ -192,7 +191,7 @@ export class TripService {
         // Find and delete all related TripStages for the Trip
         const tripStages = await this.tripStageRepository.find({
             where: {trip: {id}}, // Assuming trip is a relation in TripStage
-        });
+        } as FindOneOptions<TripStage>);
 
         if (tripStages?.length) {
             for (const tripStage of tripStages) {
