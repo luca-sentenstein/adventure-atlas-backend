@@ -3,7 +3,9 @@ FROM trip;
 
 
 DELETE FROM trip
-WHERE id=1;
+WHERE id=4;
+
+DELETE FROM "trip" WHERE "id" IN (2)
 
 
 SELECT *

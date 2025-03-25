@@ -2,7 +2,7 @@ import { Entity, Column, ManyToOne, OneToMany, JoinColumn } from "typeorm";
 import { BaseEntity } from "../shared/base";
 import { User } from "../user/user.entity";
 import { TripStage } from "./trip-stage.entity";
-import { IsArray, IsBoolean, IsInt, IsString } from "class-validator";
+import { IsArray, IsBoolean, IsDate, IsInt, IsString } from "class-validator";
 import { Expose, Type } from "class-transformer";
 
 @Entity()

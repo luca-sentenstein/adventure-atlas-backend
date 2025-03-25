@@ -6,3 +6,13 @@ Content-Type: application/json
     "userName": "ilikeadventure",
     "password": "Ihaveasuperstronpassword1234!"
 }
+
+
+### Login
+POST http://localhost:3000/auth/login
+Content-Type: application/json
+
+{
+    "userName": "username",
+    "password": "password"
+}

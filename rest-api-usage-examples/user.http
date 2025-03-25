@@ -18,7 +18,7 @@ Accept: application/json
 
 ### Deletes user
 DELETE http://localhost:3000/user
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImlsaWtlYWR2ZW50dXJlIiwiaWQiOjQsImlhdCI6MTc0MTk3MTAyMCwiZXhwIjoxNzQxOTc0NjIwfQ.Fed0cpQ05Mf-QJajuDk8tOQsu_qbVDNltsBbztCz2zc
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6InVzZXJuYW1lIiwiaWQiOjYsImlhdCI6MTc0MjgzNzI2NSwiZXhwIjoxNzQyODQwODY1fQ.DRT25sk6USJ32JoRQR2nS_4ByaK4r8Dk_QLDkQxikuk
 Accept: application/json
 
 
