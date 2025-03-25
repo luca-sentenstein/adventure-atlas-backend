@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException, UnauthorizedException } from "@nestjs/common";
+import { Injectable, NotFoundException } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Trip } from "./trip.entity";
 import { FindOneOptions, In, Repository } from "typeorm";
@@ -17,23 +17,20 @@ export class TripService {
         private readonly userService: UserService,
     ) {}
 
-    async createTrip(userId: number, tripData: Partial<Trip>): Promise<void> {
+    async createTrip(userId: number, tripData: Partial<Trip>): Promise<Trip> {
         // Fetch the user from the database
         const partialUser = await this.userService.readOneById(userId);
-        if (!partialUser) {
-            throw new Error("User not found");
-        }
+        if (!partialUser)
+            throw new NotFoundException("User not found");
 
         // Create a new User instance
         const user = new User();
         Object.assign(user, partialUser); // Copy properties from partialUser to user
-
-        console.log(user);
         // Assign the user instance to the trip's owner
         tripData.owner = user;
 
         // Create the trip
-        await this.create(tripData); // Assuming this.create is the method to save the trip
+        return await this.create(tripData);
     }
 
     async insertMultipleLocations(
@@ -42,21 +39,16 @@ export class TripService {
         waypoints: Waypoint[],
     ): Promise<void> {
         const stageData = await this.tripStageRepository.findOne({
-            where: { id: stageId }, // Assuming 'id' is the primary key of TripStage
-            relations: { waypoints: true }, // Ensure locations are loaded
+            where: { id: stageId },
+            relations: { waypoints: true },
         });
 
-        if (!stageData) {
-            throw new Error(`TripStage with ID ${stageId} not found`);
-        }
+        if (!stageData)
+            throw new NotFoundException(`TripStage with ID ${stageId} not found`);
 
         const trip = await this.readOne(tripId);
-        if (!trip) {
-            throw new Error("Trip not found");
-        }
-        console.log("tripId: " + tripId + " stageId: " + stageId);
-        console.log(typeof waypoints); // "number"
-        console.log(waypoints);
+        if (!trip)
+            throw new NotFoundException("Trip not found");
 
         // add all locations to stage
         stageData.waypoints = waypoints;
@@ -66,7 +58,6 @@ export class TripService {
 
         // Add the updated TripStage to the Trip
         trip.stages.push(stageData);
-        //await this.create(trip);
     }
 
     async createStage(
@@ -75,13 +66,12 @@ export class TripService {
     ): Promise<TripStage> {
         const trip = await this.readOne(tripId);
         if (!trip) {
-            throw new Error("Trip not found");
+            throw new NotFoundException("Trip not found");
         }
 
         const newStage = this.tripStageRepository.create(stageData);
         trip.stages.push(newStage);
         await this.create(trip);
-
         return newStage;
     }
 
@@ -119,8 +109,6 @@ export class TripService {
             },
         } as FindOneOptions<Trip>);
     }
-
-
 
 
     // get all trips by tripId list
@@ -177,12 +165,8 @@ export class TripService {
     }
 
     async deleteStage(id: number): Promise<void> {
-
-
-
             // Delete the tripStage
             await this.tripStageRepository.delete(id);
-
     }
 
     async deleteTrip(id: number): Promise<void> {
@@ -194,30 +178,11 @@ export class TripService {
         } as FindOneOptions<TripStage>);
 
         if (tripStages?.length) {
-            for (const tripStage of tripStages) {
+            for (const tripStage of tripStages)
                 await this.tripStageRepository.delete(tripStage.id);
-            }
         }
 
         // Finally, delete the Trip itself
         await this.tripsRepository.delete(id);
-    }
-
-
-    doesUserHaveRightsToUpdateAccess(request: Request, tripId): boolean {
-        const userId = this.extractUserId(request)
-        // Rights to set trip access
-            if (!(this.isOwner(userId, tripId)))
-                throw new UnauthorizedException()
-        return true;
-    }
-
-
-
-    extractUserId(request: Request): number {
-        const userId = (request as { user?: { id?: number } }).user?.id; // Assuming 'id' is the user ID in the JWT payload
-        if (!userId)
-            throw new NotFoundException("User ID not found in token");
-        return userId;
     }
 }
