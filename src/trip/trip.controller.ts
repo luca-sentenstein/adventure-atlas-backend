@@ -88,6 +88,7 @@ export class TripController {
         @Param("tripId", ParseIntPipe) tripId: number,
         @Req() request: Request,
     ): Promise<Trip | null | undefined> {
+        // One trip but no tripaccesses
         //this.tripAccessService.doesUserHaveRightsToEditTrip(request,tripId);
         //return await this.tripService.readOne(tripId);
 
