@@ -61,14 +61,10 @@ export class TripAccessService {
         trips =
             await this.attachTripAccessesToTrips(trips);
 
-        if (trips.length == 0) {
-            throw new NotFoundException(
-                "No trips found for the given trip accesses",
-            );
-        }
+
         if (trips) {
             return trips;
-        } else throw new NotFoundException();
+        } else return [];
     }
 
     // get all tripIds that a user has access to (all table entries with userid)
