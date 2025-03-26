@@ -88,8 +88,11 @@ export class TripController {
         @Param("tripId", ParseIntPipe) tripId: number,
         @Req() request: Request,
     ): Promise<Trip | null | undefined> {
-        this.tripAccessService.doesUserHaveRightsToEditTrip(request,tripId);
-        return await this.tripService.readOne(tripId);
+        //this.tripAccessService.doesUserHaveRightsToEditTrip(request,tripId);
+        //return await this.tripService.readOne(tripId);
+
+        const trips = await this.tripAccessService.readTripsByAccess(request);
+        return trips.find(item => item.id === tripId);
     }
 
 

@@ -140,6 +140,7 @@ export class TripService {
             select: {
                 owner: {
                     id: true, // Only include the owner's id
+                    userName: true,
                 },
             },
         } as FindOneOptions<Trip>);

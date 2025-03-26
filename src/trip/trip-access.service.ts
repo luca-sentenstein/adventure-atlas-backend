@@ -72,20 +72,6 @@ export class TripAccessService {
     }
 
     // get all tripIds that a user has access to (all table entries with userid)
-    async readOneByUserId(id: number, tripId: number): Promise<TripAccess[]> {
-        return await this.tripAccessRepository.find({
-            where: {
-                user: {id},
-                trip: {tripId},
-            },
-            relations: {
-                trip: true,
-                user: true,
-            },
-        } as FindOneOptions<TripAccess>);
-    }
-
-    // get all tripIds that a user has access to (all table entries with userid)
     async readAllByUserId(id: number): Promise<TripAccess[]> {
         return await this.tripAccessRepository.find({
             where: {
@@ -119,6 +105,31 @@ export class TripAccessService {
             },
         } as FindOneOptions<TripAccess>);
     }
+
+    /*
+    async attachTripAccessesToTrip(trip: Trip): Promise<Trip> {
+        // Fetch all trip accesses for given trip IDs
+        const tripAccesses = await this.readAllAccessByTripIds(tripId);
+
+        // Create a map of trip accesses by trip ID for quick lookup
+        const tripAccessMap = tripAccesses.reduce(
+            (acc: Record<number, TripAccess[]>, access: TripAccess) => {
+                const tripId = access.trip.id;
+                if (!acc[tripId]) {
+                    acc[tripId] = [];
+                }
+                acc[tripId].push(access);
+                return acc;
+            },
+            {},
+        );
+
+        // Attach trip accesses to each trip
+        trip.tr = tripAccesses;
+        return trip;
+    }
+    */
+
 
     async attachTripAccessesToTrips(trips: Trip[]): Promise<Trip[]> {
         const tripIds = trips.map((trip) => trip.id);
