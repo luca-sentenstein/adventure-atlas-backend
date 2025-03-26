@@ -65,17 +65,17 @@ Content-Type: application/json
 
 ### Get all trips that the user has access to
 GET http://localhost:3000/trip/
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImlsaWtlYWR2ZW50dXJlIiwiaWQiOjEsImlhdCI6MTc0Mjk3ODc1MCwiZXhwIjoxNzQyOTgyMzUwfQ.rGHuCLITcPfUNA3qiSOh9jHZ_P-VOg2uEFulccvhOAc
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImlsaWtlYWR2ZW50dXJlIiwiaWQiOjEsImlhdCI6MTc0Mjk4Mjc1NywiZXhwIjoxNzQyOTg2MzU3fQ.rSunjWWyr3Lp8pgTreLfZNhDp8UEXIGMVCfZhEY5CRc
 Content-Type: application/json
 
 ### Get a trip that the user has access to
-GET http://localhost:3000/trip/2
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImlsaWtlYWR2ZW50dXJlIiwiaWQiOjEsImlhdCI6MTc0Mjk3ODc1MCwiZXhwIjoxNzQyOTgyMzUwfQ.rGHuCLITcPfUNA3qiSOh9jHZ_P-VOg2uEFulccvhOAc
+GET http://localhost:3000/trip/1
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImlsaWtlYWR2ZW50dXJlIiwiaWQiOjEsImlhdCI6MTc0Mjk4Mjc1NywiZXhwIjoxNzQyOTg2MzU3fQ.rSunjWWyr3Lp8pgTreLfZNhDp8UEXIGMVCfZhEY5CRc
 Content-Type: application/json
 
 ### Add a Tripaccess to trip
 POST http://localhost:3000/trip/access
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImlsaWtlYWR2ZW50dXJlIiwiaWQiOjEsImlhdCI6MTc0MjkyMzkwNiwiZXhwIjoxNzQyOTI3NTA2fQ.BfynK7krqp3kAxVS25UAEnjAdhHt8TcXRQrCEU1fOxE
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImlsaWtlYWR2ZW50dXJlIiwiaWQiOjEsImlhdCI6MTc0Mjk4MTkzMiwiZXhwIjoxNzQyOTg1NTMyfQ.AaPIN7sCtUbnSeSFJu950r4gHXhJRevyjNvh7AqFOEo
 Content-Type: application/json
 
 {
@@ -97,18 +97,34 @@ Content-Type: application/json
 
 ### Add a Stage
 POST http://localhost:3000/trip/1/newStage
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImlsaWtlYWR2ZW50dXJlIiwiaWQiOjEsImlhdCI6MTc0Mjk4MzMzMCwiZXhwIjoxNzQyOTg2OTMwfQ.pZ-Wo0xE98sHT6rBdc3B443Zlpo3Amh3OPUnmzbWEng
 Content-Type: application/json
 
 {
   "index" : 1,
   "title": "Stage 3",
-  "picture": "base64encodedimage",
   "description": "This is a new stage",
   "displayRoute": true,
   "cost": 100,
   "start": "2023-10-01T00:00:00Z",
   "end": "2023-10-02T00:00:00Z",
-  "day" : 1
+  "day" : 6
+}
+
+### Update a Stage
+PATCH http://localhost:3000/trip/1/stages/1
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImlsaWtlYWR2ZW50dXJlIiwiaWQiOjEsImlhdCI6MTc0Mjk4MzMzMCwiZXhwIjoxNzQyOTg2OTMwfQ.pZ-Wo0xE98sHT6rBdc3B443Zlpo3Amh3OPUnmzbWEng
+Content-Type: application/json
+
+{
+    "index" : 1,
+    "title": "Stage 3",
+    "description": "This is a new stage",
+    "displayRoute": true,
+    "cost": 100,
+    "start": "2023-10-01T00:00:00Z",
+    "end": "2023-10-02T00:00:00Z",
+    "day" : 4
 }
 
 ### Add a locations to stage
