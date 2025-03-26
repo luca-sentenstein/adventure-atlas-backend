@@ -145,7 +145,6 @@ export class TripService {
         } as FindOneOptions<Trip>);
     }
 
-
     async isOwner(userId: number, tripId: number): Promise<boolean> {
         const trip = await this.tripsRepository.findOne({
             where: {id: tripId},

@@ -81,6 +81,17 @@ export class TripController {
         return await this.tripAccessService.readTripsByAccess(request);
     }
 
+    // get all trips by user id
+    @UseGuards(JwtAuthGuard)
+    @Get(":tripId")
+    async getTripByAccess(
+        @Param("tripId", ParseIntPipe) tripId: number,
+        @Req() request: Request,
+    ): Promise<Trip | null | undefined> {
+        this.tripAccessService.doesUserHaveRightsToEditTrip(request,tripId);
+        return await this.tripService.readOne(tripId);
+    }
+
 
     // User starts creating trip, create base trip first
     // create a whole trip

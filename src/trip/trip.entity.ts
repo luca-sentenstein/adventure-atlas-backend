@@ -35,6 +35,10 @@ export class Trip extends BaseEntity {
     @IsDate()
     startDate: Date;
 
+    @Column()
+    @IsDate()
+    length: number;
+
     // cascade: true automatically inserts the stages, when a trip gets saved
     // one trip many tripstages
     @OneToMany(() => TripStage, (stage) => stage.trip, {cascade: true})
