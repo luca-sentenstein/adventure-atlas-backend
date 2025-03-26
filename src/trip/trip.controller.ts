@@ -81,6 +81,21 @@ export class TripController {
         return await this.tripAccessService.readTripsByAccess(request);
     }
 
+    // get all trips by user id
+    @UseGuards(JwtAuthGuard)
+    @Get(":tripId")
+    async getTripByAccess(
+        @Param("tripId", ParseIntPipe) tripId: number,
+        @Req() request: Request,
+    ): Promise<Trip | null | undefined> {
+        // One trip but no tripaccesses
+        //this.tripAccessService.doesUserHaveRightsToEditTrip(request,tripId);
+        //return await this.tripService.readOne(tripId);
+
+        const trips = await this.tripAccessService.readTripsByAccess(request);
+        return trips.find(item => item.id === tripId);
+    }
+
 
     // User starts creating trip, create base trip first
     // create a whole trip
@@ -122,9 +137,9 @@ export class TripController {
         @Req() request: Request,
         @Param("tripId", ParseIntPipe) tripId: number,
         @Body() tripStage: Partial<TripStage>,
-    ): Promise<void> {
+    ): Promise<TripStage> {
         this.tripAccessService.doesUserHaveRightsToEditTrip(request, tripId);
-        await this.tripService.createStage(tripId, tripStage);
+        return await this.tripService.createStage(tripId, tripStage);
     }
 
     // create locations of a stage
@@ -148,15 +163,15 @@ export class TripController {
 
     // update a stage without the locations, just basic information like description etc.
     @UseGuards(JwtAuthGuard)
-    @Patch(":tripId/newStage")
+    @Patch(":tripId/stages/:stageId")
     @UsePipes(new ValidationPipe({transform: true}))
     async updateStage(
         @Req() request: Request,
         @Param("tripId", ParseIntPipe) tripId: number,
+        @Param("stageId", ParseIntPipe) stageId: number,
         @Body() tripStage: Partial<TripStage>,
-    ): Promise<void> {
+    ): Promise<TripStage | null> {
         this.tripAccessService.doesUserHaveRightsToEditTrip(request, tripId)
-        // Create the stage
-        await this.tripService.createStage(tripId, tripStage);
+        return await this.tripService.updateStage(tripId, stageId, tripStage);
     }
 }

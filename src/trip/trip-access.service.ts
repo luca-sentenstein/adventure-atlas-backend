@@ -24,6 +24,7 @@ export class TripAccessService {
         return userId;
     }
 
+
     async readTripsByAccess(request: Request): Promise<Trip[]> {
         const userId = this.extractUserId(request)
         const userTripAccesses =
@@ -104,6 +105,7 @@ export class TripAccessService {
             },
         } as FindOneOptions<TripAccess>);
     }
+
 
     async attachTripAccessesToTrips(trips: Trip[]): Promise<Trip[]> {
         const tripIds = trips.map((trip) => trip.id);

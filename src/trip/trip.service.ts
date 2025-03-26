@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Trip } from "./trip.entity";
-import { FindOneOptions, In, Repository } from "typeorm";
+import { FindOneOptions, In, Repository} from "typeorm";
 import { TripStage } from "./trip-stage.entity";
 import { Waypoint } from "./waypoint.entity";
 import { UserService } from '../user/user.service';
@@ -75,6 +75,20 @@ export class TripService {
         return newStage;
     }
 
+    async updateStage(
+        tripId: number,
+        stageId: number,
+        stageData: Partial<TripStage>,
+    ): Promise<TripStage | null> {
+        const trip = await this.readOne(tripId);
+        if (!trip)
+            throw new NotFoundException("Trip not found");
+
+        await this.tripStageRepository.update(stageId,stageData);
+        return await this.tripStageRepository.findOneBy({ id: stageId });
+         //trip.stages.find(item => item.id === stageId);
+    }
+
     async create(trip: Partial<Trip>): Promise<Trip> {
         return await this.tripsRepository.save(trip);
     }
@@ -140,11 +154,11 @@ export class TripService {
             select: {
                 owner: {
                     id: true, // Only include the owner's id
+                    userName: true,
                 },
             },
         } as FindOneOptions<Trip>);
     }
-
 
     async isOwner(userId: number, tripId: number): Promise<boolean> {
         const trip = await this.tripsRepository.findOne({

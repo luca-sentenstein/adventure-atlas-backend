@@ -118,6 +118,22 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6Imlsa
 Content-Type: application/json
 
 {
+  "index" : 1,
+  "title": "Stage 3",
+  "description": "This is a new stage",
+  "displayRoute": true,
+  "cost": 100,
+  "start": "2023-10-01T00:00:00Z",
+  "end": "2023-10-02T00:00:00Z",
+  "day" : 6
+}
+
+### Update a Stage
+PATCH http://localhost:3000/trip/1/stages/1
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImlsaWtlYWR2ZW50dXJlIiwiaWQiOjEsImlhdCI6MTc0Mjk4MzMzMCwiZXhwIjoxNzQyOTg2OTMwfQ.pZ-Wo0xE98sHT6rBdc3B443Zlpo3Amh3OPUnmzbWEng
+Content-Type: application/json
+
+{
     "index" : 1,
     "title": "Stage 3",
     "description": "This is a new stage",
