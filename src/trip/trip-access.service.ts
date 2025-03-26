@@ -24,6 +24,7 @@ export class TripAccessService {
         return userId;
     }
 
+
     async readTripsByAccess(request: Request): Promise<Trip[]> {
         const userId = this.extractUserId(request)
         const userTripAccesses =
@@ -68,6 +69,20 @@ export class TripAccessService {
         if (trips) {
             return trips;
         } else throw new NotFoundException();
+    }
+
+    // get all tripIds that a user has access to (all table entries with userid)
+    async readOneByUserId(id: number, tripId: number): Promise<TripAccess[]> {
+        return await this.tripAccessRepository.find({
+            where: {
+                user: {id},
+                trip: {tripId},
+            },
+            relations: {
+                trip: true,
+                user: true,
+            },
+        } as FindOneOptions<TripAccess>);
     }
 
     // get all tripIds that a user has access to (all table entries with userid)
