@@ -115,6 +115,7 @@ export class TripController {
 
 
     // create a stage without the route
+    @UseGuards(JwtAuthGuard)
     @Post(":tripId/newStage")
     @UsePipes(new ValidationPipe({transform: true}))
     async createStage(

@@ -1,6 +1,6 @@
 ### Create a trip
 POST http://localhost:3000/trip
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImlsaWtlYWR2ZW50dXJlIiwiaWQiOjEsImlhdCI6MTc0MjkxODM3NiwiZXhwIjoxNzQyOTIxOTc2fQ.zuXxaGF1Mz4b4yOVLVLKG7rzd1f4d6P2oseyC_7CPCk
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImlsaWtlYWR2ZW50dXJlIiwiaWQiOjEsImlhdCI6MTc0MjkyMzE0NiwiZXhwIjoxNzQyOTI2NzQ2fQ.gySpxMkdGtXnQzkqn4DkJOLg_Rdd4G6yyzcWPvxAXm8
 Content-Type: application/json
 
 {
@@ -14,7 +14,7 @@ Content-Type: application/json
 
 ### Create a trip
 POST http://localhost:3000/trip
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImlsaWtlYWR2ZW50dXJlIiwiaWQiOjEsImlhdCI6MTc0MjkxODM3NiwiZXhwIjoxNzQyOTIxOTc2fQ.zuXxaGF1Mz4b4yOVLVLKG7rzd1f4d6P2oseyC_7CPCk
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImlsaWtlYWR2ZW50dXJlIiwiaWQiOjEsImlhdCI6MTc0Mjk3ODc1MCwiZXhwIjoxNzQyOTgyMzUwfQ.rGHuCLITcPfUNA3qiSOh9jHZ_P-VOg2uEFulccvhOAc
 Content-Type: application/json
 
 {
@@ -24,6 +24,7 @@ Content-Type: application/json
     "image": null,
     "public": true,
     "startDate": "2023-03-25T14:30:00.000Z",
+    "length": "1",
     "stages": [
         {
             "index": 1,
@@ -64,12 +65,17 @@ Content-Type: application/json
 
 ### Get all trips that the user has access to
 GET http://localhost:3000/trip/
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImlsaWtlYWR2ZW50dXJlIiwiaWQiOjEsImlhdCI6MTc0MjkwNjIwNywiZXhwIjoxNzQyOTA5ODA3fQ.0TvJwC5eibhp3GI_HtRzo1mJiUlG1FHaH1lyY66AzoQ
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImlsaWtlYWR2ZW50dXJlIiwiaWQiOjEsImlhdCI6MTc0Mjk4Mjc1NywiZXhwIjoxNzQyOTg2MzU3fQ.rSunjWWyr3Lp8pgTreLfZNhDp8UEXIGMVCfZhEY5CRc
+Content-Type: application/json
+
+### Get a trip that the user has access to
+GET http://localhost:3000/trip/1
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImlsaWtlYWR2ZW50dXJlIiwiaWQiOjEsImlhdCI6MTc0Mjk4Mjc1NywiZXhwIjoxNzQyOTg2MzU3fQ.rSunjWWyr3Lp8pgTreLfZNhDp8UEXIGMVCfZhEY5CRc
 Content-Type: application/json
 
 ### Add a Tripaccess to trip
 POST http://localhost:3000/trip/access
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImlsaWtlYWR2ZW50dXJlIiwiaWQiOjEsImlhdCI6MTc0MjkwMTg3MCwiZXhwIjoxNzQyOTA1NDcwfQ.tMACQKjZ84GhuJR3q1bdsRFBA1GNs058SkWe-TvADG8
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImlsaWtlYWR2ZW50dXJlIiwiaWQiOjEsImlhdCI6MTc0Mjk4MTkzMiwiZXhwIjoxNzQyOTg1NTMyfQ.AaPIN7sCtUbnSeSFJu950r4gHXhJRevyjNvh7AqFOEo
 Content-Type: application/json
 
 {
@@ -90,23 +96,41 @@ GET http://localhost:3000/trip/discover
 Content-Type: application/json
 
 ### Add a Stage
-POST http://localhost:3000/trip/2/newStage
+POST http://localhost:3000/trip/1/newStage
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImlsaWtlYWR2ZW50dXJlIiwiaWQiOjEsImlhdCI6MTc0MzAwMzc0MSwiZXhwIjoxNzQzMDA3MzQxfQ.IcxbIJEVdQMpsFyC175FMARqktUZSdoKD-kt_2MhSqw
 Content-Type: application/json
 
 {
-  "index" : 1,
-  "title": "Stage 3",
-  "picture": "base64encodedimage",
-  "description": "This is a new stage",
-  "displayRoute": true,
-  "cost": 100,
-  "start": "2023-10-01T00:00:00Z",
-  "end": "2023-10-02T00:00:00Z",
-  "day" : 1
+    "index" : 1,
+    "title": "Stage 3",
+    "description": "This is a new stage",
+    "displayRoute": true,
+    "cost": 100,
+    "start": "2023-10-01T00:00:00Z",
+    "end": "2023-10-02T00:00:00Z",
+    "day" : 4
+
+}
+
+### Update a Stage
+PATCH http://localhost:3000/trip/1/stages/1
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImlsaWtlYWR2ZW50dXJlIiwiaWQiOjEsImlhdCI6MTc0Mjk4MzMzMCwiZXhwIjoxNzQyOTg2OTMwfQ.pZ-Wo0xE98sHT6rBdc3B443Zlpo3Amh3OPUnmzbWEng
+Content-Type: application/json
+
+{
+    "index" : 1,
+    "title": "Stage 3",
+    "description": "This is a new stage",
+    "displayRoute": true,
+    "cost": 100,
+    "start": "2023-10-01T00:00:00Z",
+    "end": "2023-10-02T00:00:00Z",
+    "day" : 4
 }
 
 ### Add a locations to stage
-POST http://localhost:3000/trip/2/stages/4/locations
+POST http://localhost:3000/trip/1/stages/1/locations
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImlsaWtlYWR2ZW50dXJlIiwiaWQiOjEsImlhdCI6MTc0MjkyMzE0NiwiZXhwIjoxNzQyOTI2NzQ2fQ.gySpxMkdGtXnQzkqn4DkJOLg_Rdd4G6yyzcWPvxAXm8
 Content-Type: application/json
 
 [
@@ -130,6 +154,6 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6Imlsa
 Accept: application/json
 
 ### Delete trip (Is successful when user is owner of trip)
-DELETE http://localhost:3000/trip/8
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImlsaWtlYWR2ZW50dXJlIiwiaWQiOjQsImlhdCI6MTc0MjgzODUwNywiZXhwIjoxNzQyODQyMTA3fQ.Kq9C-9o3tnr23VAU5n8kEAvwQEB62qWK6_AvAnGTObA
+DELETE http://localhost:3000/trip/1
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImlsaWtlYWR2ZW50dXJlIiwiaWQiOjEsImlhdCI6MTc0MjkyMzE0NiwiZXhwIjoxNzQyOTI2NzQ2fQ.gySpxMkdGtXnQzkqn4DkJOLg_Rdd4G6yyzcWPvxAXm8
 Accept: application/json
