@@ -130,15 +130,16 @@ export class TripController {
 
 
     // create a stage without the route
+    @UseGuards(JwtAuthGuard)
     @Post(":tripId/newStage")
     @UsePipes(new ValidationPipe({transform: true}))
     async createStage(
         @Req() request: Request,
         @Param("tripId", ParseIntPipe) tripId: number,
         @Body() tripStage: Partial<TripStage>,
-    ): Promise<void> {
+    ): Promise<TripStage> {
         this.tripAccessService.doesUserHaveRightsToEditTrip(request, tripId);
-        await this.tripService.createStage(tripId, tripStage);
+        return await this.tripService.createStage(tripId, tripStage);
     }
 
     // create locations of a stage
@@ -162,15 +163,15 @@ export class TripController {
 
     // update a stage without the locations, just basic information like description etc.
     @UseGuards(JwtAuthGuard)
-    @Patch(":tripId/newStage")
+    @Patch(":tripId/stages/:stageId")
     @UsePipes(new ValidationPipe({transform: true}))
     async updateStage(
         @Req() request: Request,
         @Param("tripId", ParseIntPipe) tripId: number,
+        @Param("stageId", ParseIntPipe) stageId: number,
         @Body() tripStage: Partial<TripStage>,
-    ): Promise<void> {
+    ): Promise<TripStage | null> {
         this.tripAccessService.doesUserHaveRightsToEditTrip(request, tripId)
-        // Create the stage
-        await this.tripService.createStage(tripId, tripStage);
+        return await this.tripService.updateStage(tripId, stageId, tripStage);
     }
 }
