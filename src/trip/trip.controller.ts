@@ -28,18 +28,14 @@ export class TripController {
     ) {
     }
 
-    // set access of user for trip
+    // User starts creating trip, create base trip first
+    // create a whole trip
     @UseGuards(JwtAuthGuard)
-    @Post("access")
-    async createTripAccess(
-        @Req() request: Request,
-        @Body() tripAccess: TripAccessDto,
-    ): Promise<TripAccess | undefined | null> {
-        this.tripAccessService.doesUserHaveRightsToEditTrip(request, tripAccess.trip);
-        // find id of user in tripAccess by username
-        // find out if user has write access on trip, else throw unauthorized
-        // only owner can set read write
-        return await this.tripAccessService.create(tripAccess);
+    @Post()
+    @UsePipes(new ValidationPipe({transform: true}))
+    async createTrip(@Req() request: Request, @Body() trip: Partial<Trip>): Promise<Trip> {
+        const userId = this.tripAccessService.extractUserId(request);
+        return await this.tripService.createTrip(userId, trip);
     }
 
     @UseGuards(JwtAuthGuard)
@@ -52,19 +48,6 @@ export class TripController {
         this.tripAccessService.doesUserHaveRightsToEditTrip(request, tripId);
         await this.tripService.update(tripId, trip);
     }
-
-    // set access of user for trip
-    @UseGuards(JwtAuthGuard)
-    @Delete("access/:tripAccessId")
-    async deleteTripAccess(
-        @Req() request: Request,
-        @Param("tripAccessId", ParseIntPipe) tripAccessId: number,
-        @Body() tripAccess: TripAccess,
-    ): Promise<void> {
-        this.tripAccessService.doesUserHaveRightsToUpdateAccess(request, tripAccessId);
-        await this.tripAccessService.removeTripAccess(request, tripAccessId);
-    }
-
 
     // get all public trips
     @Get("discover")
@@ -90,44 +73,49 @@ export class TripController {
     ): Promise<Trip | null | undefined> {
         // One trip but no tripaccesses
         //this.tripAccessService.doesUserHaveRightsToEditTrip(request,tripId);
-        //return await this.tripService.readOne(tripId);
+        const trip = await this.tripService.readOne(tripId);
+        if (trip?.public)
+            return trip;
 
         const trips = await this.tripAccessService.readTripsByAccess(request);
         return trips.find(item => item.id === tripId);
     }
 
-
-    // User starts creating trip, create base trip first
-    // create a whole trip
-    @UseGuards(JwtAuthGuard)
-    @Post()
-    @UsePipes(new ValidationPipe({transform: true}))
-    async createTrip(@Req() request: Request, @Body() trip: Partial<Trip>): Promise<Trip> {
-        const userId = this.tripAccessService.extractUserId(request);
-        return await this.tripService.createTrip(userId, trip);
-    }
-
     // delete trip
     @UseGuards(JwtAuthGuard)
-    @Delete(":id")
+    @Delete(":tripId")
     async deleteTrip(@Req() request: Request,
-                     @Param("id", ParseIntPipe) tripId: number,): Promise<void> {
+                     @Param("tripId", ParseIntPipe) tripId: number,): Promise<void> {
         this.tripAccessService.doesUserHaveRightsToEditTrip(request, tripId);
         // delete trip
         await this.tripService.deleteTrip(tripId);
     }
 
-    // delete trip
+    // set access of user for trip
     @UseGuards(JwtAuthGuard)
-    @Delete(":tripId/stages/:stageId")
-    async deleteStage(@Req() request: Request,
-                      @Param("tripId", ParseIntPipe) tripId: number,
-                      @Param("stageId", ParseIntPipe) stageId: number,): Promise<void> {
-        this.tripAccessService.doesUserHaveRightsToEditTrip(request, tripId);
-        // delete stage
-        await this.tripService.deleteStage(stageId);
+    @Post("access")
+    async createTripAccess(
+        @Req() request: Request,
+        @Body() tripAccess: TripAccessDto,
+    ): Promise<TripAccess | undefined | null> {
+        this.tripAccessService.doesUserHaveRightsToEditTrip(request, tripAccess.trip);
+        // find id of user in tripAccess by username
+        // find out if user has write access on trip, else throw unauthorized
+        // only owner can set read write
+        return await this.tripAccessService.create(tripAccess);
     }
 
+    // set access of user for trip
+    @UseGuards(JwtAuthGuard)
+    @Delete("access/:tripAccessId")
+    async deleteTripAccess(
+        @Req() request: Request,
+        @Param("tripAccessId", ParseIntPipe) tripAccessId: number,
+        @Body() tripAccess: TripAccess,
+    ): Promise<void> {
+        this.tripAccessService.doesUserHaveRightsToUpdateAccess(request, tripAccessId);
+        await this.tripAccessService.removeTripAccess(request, tripAccessId);
+    }
 
     // create a stage without the route
     @UseGuards(JwtAuthGuard)
@@ -140,6 +128,31 @@ export class TripController {
     ): Promise<TripStage> {
         this.tripAccessService.doesUserHaveRightsToEditTrip(request, tripId);
         return await this.tripService.createStage(tripId, tripStage);
+    }
+
+    // update a stage without the locations, just basic information like description etc.
+    @UseGuards(JwtAuthGuard)
+    @Patch(":tripId/stages/:stageId")
+    @UsePipes(new ValidationPipe({transform: true}))
+    async updateStage(
+        @Req() request: Request,
+        @Param("tripId", ParseIntPipe) tripId: number,
+        @Param("stageId", ParseIntPipe) stageId: number,
+        @Body() tripStage: Partial<TripStage>,
+    ): Promise<TripStage | null> {
+        this.tripAccessService.doesUserHaveRightsToEditTrip(request, tripId)
+        return await this.tripService.updateStage(tripId, stageId, tripStage);
+    }
+
+    // delete trip
+    @UseGuards(JwtAuthGuard)
+    @Delete(":tripId/stages/:stageId")
+    async deleteStage(@Req() request: Request,
+                      @Param("tripId", ParseIntPipe) tripId: number,
+                      @Param("stageId", ParseIntPipe) stageId: number,): Promise<void> {
+        this.tripAccessService.doesUserHaveRightsToEditTrip(request, tripId);
+        // delete stage
+        await this.tripService.deleteStage(stageId);
     }
 
     // create locations of a stage
@@ -161,17 +174,5 @@ export class TripController {
         );
     }
 
-    // update a stage without the locations, just basic information like description etc.
-    @UseGuards(JwtAuthGuard)
-    @Patch(":tripId/stages/:stageId")
-    @UsePipes(new ValidationPipe({transform: true}))
-    async updateStage(
-        @Req() request: Request,
-        @Param("tripId", ParseIntPipe) tripId: number,
-        @Param("stageId", ParseIntPipe) stageId: number,
-        @Body() tripStage: Partial<TripStage>,
-    ): Promise<TripStage | null> {
-        this.tripAccessService.doesUserHaveRightsToEditTrip(request, tripId)
-        return await this.tripService.updateStage(tripId, stageId, tripStage);
-    }
+
 }

@@ -37,11 +37,16 @@ export class UserController {
         return await this.userService.create(user);
     }
 
+    // User changes his data (everything changeable except the id)
     @UseGuards(JwtAuthGuard)
-    @Delete()
-    async deleteUser(@Req() request: Request): Promise<void> {
+    @Patch()
+    async updateUser(
+        @Req() request: Request,
+        @Body() user: User,
+    ): Promise<UpdateResult | null | undefined> {
         const userId = this.extractUserId(request);
-        await this.userService.delete(userId);
+        // Update the user
+        return await this.userService.update(userId, user);
     }
 
     // After successful login
@@ -55,15 +60,12 @@ export class UserController {
         else throw new NotFoundException();
     }
 
-    // User changes his data (everything changeable except the id)
     @UseGuards(JwtAuthGuard)
-    @Patch()
-    async updateUser(
-        @Req() request: Request,
-        @Body() user: User,
-    ): Promise<UpdateResult | null | undefined> {
+    @Delete()
+    async deleteUser(@Req() request: Request): Promise<void> {
         const userId = this.extractUserId(request);
-            // Update the user
-            return await this.userService.update(userId, user);
+        await this.userService.delete(userId);
     }
+
+
 }
