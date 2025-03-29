@@ -22,7 +22,6 @@ async function bootstrap() {
     app.enableCors({
         origin: "http://" + configService.frontendHost + ":" + configService.frontendPort,
         methods: "GET, PATCH, POST, DELETE",
-        allowedHeaders: ["Content-Type", "Authorization"]
     });
 
     app.use(bodyParser.json({ limit: '50mb' })); // Adjust the limit as needed
